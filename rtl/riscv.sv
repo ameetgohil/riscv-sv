@@ -157,6 +157,88 @@ module riscv
    
    assign instr_load = instr_lb | instr_lw | instr_lbu | instr_lhu;
    assign instr_store = instr_sb | instr_sh | instr_sw;
-   assign instr_alu_imm = instr_addi | instr_slti | instr_sltiu | instr_xori | instr_ori | instr_andi | ins
+   assign instr_alu_imm = instr_addi | instr_slti | instr_sltiu | instr_xori | instr_ori | instr_andi | instr_slli | instr_srli | instr_srai;
+   assign instr_alu_reg = instr_add | instr_sub | instr_sll | instr_slt | instr_sltu | instr_xor | instr_srl | instr_sra | instr_or | instr_or | instr_and;
+   assign instr_branch = instr_beq | instr_bne | instr_blt | instr_bge | instr_bltu | instr_bgeu;
+   assign instr_jump = instr_jal | instr_jalr;
+   assign instr_illegal = !(instr_load | instr_store | instr_alu_imm | instr_alu_reg | instr_branch | instr_jump);
+
+   //extract immediate value
+   wire [31:0]                  u_imm;
+   wire [31:0]                  j_imm;
+   wire [31:0]                  b_imm;
+   wire [31:0]                  i_imm;
+   wire [31:0]                  s_imm;
+
+   wire                         imm;
+
+   assign u_imm = { iBus_rsp_instr[31:12], 12'h0 };
+   assign j_imm = { {12{iBus_rsp_instr[31]}}, iBus_rsp_instr[19:12], iBus_rsp_instr[20], iBus_rsp_instr[30:21], 1'b0 };
+   assign b_imm = { {20{iBus_rsp_instr[31]}}, iBus_rsp_instr[7], iBus_rsp_instr[30:25], iBus_rsp_instr[11:8], 1'b0 };
+   assign i_imm = { {20{iBus_rsp_instr[31]}}, iBus_rsp_instr[31:20] };
+   assign s_imm = { {20{iBus_rsp_instr[31]}}, iBus_rsp_instr[31:25], iBus_rsp_instr[11:7] };
+
+   assign imm = (instr_lui | instr_auipc) ? u_imm:
+                instr_jal ? j_imm:
+                instr_branch ? b_imm:
+                (instr_load | instr_jalr | instr_alu_imm) ? i_imm:
+                instr_store ? s_imm:32'h0;
+
+   enum logic [3:0] { ALU_ADD,
+                      ALU_SUB,
+                      ALU_SLL,
+                      ALU_SLT,
+                      ALU_SLTU,
+                      ALU_XOR,
+                      ALU_SRL,
+                      ALU_SRA,
+                      ALU_OR,
+                      ALU_AND } alu_op;
+
+   assign alu_op = (instr_add | instr_addi) ? ALU_ADD:
+                   (instr_sub) ? ALU_SUB:
+                   (instr_sll | instr_slli) ? ALU_SLL:
+                   (instr_slt | instr_slti) ? ALU_SLT:
+                   (instr_sltu | instr_sltui) ? ALU_SLTU:
+                   (instr_xor | instr_xori) ? ALU_XOR:
+                   (instr_srl | instr_srli) ? ALU_SRL:
+                   (instr_sra | instr_srai) ? ALU_SRA:
+                   (instr_or | instr_ori) ? ALU_OR:
+                   (instr_and | instr_andi) ? ALU_AND:4'hF;
+
+   enum logic [2:0] { BR_NONE,
+                      BR_EQ,
+                      BR_NE,
+                      BR_LT,
+                      BR_GE,
+                      BR_LTU,
+                      BR_GEU,
+                      BR_JUMP } branch_op;
+
+   assign branch_op = instr_beq ? BR_EQ:
+                      instr_bne ? BR_NE:
+                      instr_blt ? BR_LT:
+                      instr_bge ? BR_GE:
+                      instr_bltu ? BR_LTU:
+                      instr_bgeu ? BR_GEU:
+                      instr_jump ? BR_JUMP:BR_NONE;
+
+
+   wire op_is_imm;
+
+   assign op_is_imm = op_alu_imm | instr_jal | op_load | op_store;
+   
+   wire [31:0] rs1_value;
+   wire [31:0] rs2_valud;
+
+   assign rs1_value = xregs[rs1];
+   assign rs2_value = xregs[rs2];
+   
+   wire [31:0] alu_srca;
+   wire [31:0] alu_srcb;
+
+
+   assign alu_srcb = op_is_imm ? imm
+   
    
 endmodule // riscv
