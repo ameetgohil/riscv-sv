@@ -193,7 +193,8 @@ module riscv
                       ALU_SRL,
                       ALU_SRA,
                       ALU_OR,
-                      ALU_AND } alu_op;
+                      ALU_AND,
+                      ALU_AUIPC } alu_op;
 
    assign alu_op = (instr_add | instr_addi) ? ALU_ADD:
                    (instr_sub) ? ALU_SUB:
@@ -204,7 +205,8 @@ module riscv
                    (instr_srl | instr_srli) ? ALU_SRL:
                    (instr_sra | instr_srai) ? ALU_SRA:
                    (instr_or | instr_ori) ? ALU_OR:
-                   (instr_and | instr_andi) ? ALU_AND:4'hF;
+                   (instr_and | instr_andi) ? ALU_AND:
+                   (instr_auipc) ? ALU_AUIPC:4'hF;
 
    enum logic [2:0] { BR_NONE,
                       BR_EQ,
@@ -238,7 +240,44 @@ module riscv
    wire [31:0] alu_srcb;
 
 
-   assign alu_srcb = op_is_imm ? imm
+   assign alu_srcb = op_is_imm ? imm : rs2_value;
+
+   reg [31:0] alu_res;
+
+   // ALU
+
+   always @(*) begin
+      case(alu_op)
+         ALU_ADD:
+           alu_res = $signed(alu_srca) + $signed(alu_srcb);
+        ALU_SUB:
+          alu_res = $signed(alu_srca) + $signed(alu_srcb);
+        ALU_SLL:
+          alu_res = alu_srca << alu_srcb;
+        ALU_SLT:
+          alu_res = $signed(alu_srca) < $signed(alu_srcb) ? 1:0;
+        ALU_SLTU:
+          alu_res = alu_srca < alu_srcb ? 1:0;
+        ALU_XOR:
+          alu_res = alu_srca ^ alu_srcb;
+        ALU_SRL:
+          alu_res = alu_srca >> alu_srcb;
+        ALU_SRA:
+          alu_res = $signed(alu_srca) >> alu_srcb;
+        ALU_OR:
+          alu_res = alu_srca | alu_srcb;
+        ALU_AND:
+          alu_res = alu_srca & alu_srcb;
+        ALU_AUIPC:
+          alu_res = pc + alu_srcb;
+        default:
+          alu_res = 0;
+      endcase // case (alu_op)
+   end // always @ (*)
+
+   assign xregs[rd] = alu_res;
+   
+        
    
    
 endmodule // riscv
