@@ -194,9 +194,9 @@ module riscv
                       ALU_SRA,
                       ALU_OR,
                       ALU_AND,
-                      ALU_AUIPC } alu_op;
+                      ALU_AUIPC } alu_type;
 
-   assign alu_op = (instr_add | instr_addi) ? ALU_ADD:
+   assign alu_type = (instr_add | instr_addi) ? ALU_ADD:
                    (instr_sub) ? ALU_SUB:
                    (instr_sll | instr_slli) ? ALU_SLL:
                    (instr_slt | instr_slti) ? ALU_SLT:
@@ -215,9 +215,9 @@ module riscv
                       BR_GE,
                       BR_LTU,
                       BR_GEU,
-                      BR_JUMP } branch_op;
+                      BR_JUMP } branch_type;
 
-   assign branch_op = instr_beq ? BR_EQ:
+   assign branch_type = instr_beq ? BR_EQ:
                       instr_bne ? BR_NE:
                       instr_blt ? BR_LT:
                       instr_bge ? BR_GE:
@@ -231,13 +231,13 @@ module riscv
    assign op_is_imm = op_alu_imm | instr_jal | op_load | op_store;
    
    wire [31:0] rs1_value;
-   wire [31:0] rs2_valud;
+   wire [31:0] rs2_value;
 
    assign rs1_value = xregs[rs1];
    assign rs2_value = xregs[rs2];
    
-   wire [31:0] alu_srca;
-   wire [31:0] alu_srcb;
+   wire [31:0] alu_srca = rs1_value;
+   wire [31:0] alu_srcb = rs2_value;
 
 
    assign alu_srcb = op_is_imm ? imm : rs2_value;
@@ -247,7 +247,7 @@ module riscv
    // ALU
 
    always @(*) begin
-      case(alu_op)
+      case(alu_type)
          ALU_ADD:
            alu_res = $signed(alu_srca) + $signed(alu_srcb);
         ALU_SUB:
@@ -272,12 +272,23 @@ module riscv
           alu_res = pc + alu_srcb;
         default:
           alu_res = 0;
-      endcase // case (alu_op)
+      endcase // case (alu_type)
    end // always @ (*)
 
    assign xregs[rd] = alu_res;
    
-        
+
+   wire branch_taken_w = 
+        (BR_JUMP == branch_type) ? 1'b1 :
+        (BR_EQ   == branch_type) ? rs1_value == rs2_value :
+        (BR_NE   == branch_type) ? rs1_value != rs2_value :
+        (BR_LT   == branch_type) ? rs1_value < rs2_value :
+        (BR_GE   == branch_type) ? rs1_value > rs2_value :
+        (BR_LTU  == branch_type) ? rs1_value <= rs2_value :
+        (BR_GEU  == branch_type) ? rs1_value >= rs2_value : 1'b0;
+   
+
+   
    
    
 endmodule // riscv
