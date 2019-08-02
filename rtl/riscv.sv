@@ -278,7 +278,9 @@ module riscv
    assign xregs[rd] = alu_res;
    
 
-   wire branch_taken_w = 
+   wire branch_taken;
+   
+   assign branch_taken = 
         (BR_JUMP == branch_type) ? 1'b1 :
         (BR_EQ   == branch_type) ? rs1_value == rs2_value :
         (BR_NE   == branch_type) ? rs1_value != rs2_value :
@@ -287,7 +289,10 @@ module riscv
         (BR_LTU  == branch_type) ? rs1_value <= rs2_value :
         (BR_GEU  == branch_type) ? rs1_value >= rs2_value : 1'b0;
    
+   wire [31:0] jump_addr;
 
+   assign jump_addr = instr_jalr ? rs1_value + imm : pc + imm;
+   
    
    
    
