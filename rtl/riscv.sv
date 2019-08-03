@@ -13,12 +13,19 @@ module riscv
    output reg [31:0] dBus_cmd_payload_address,
    output reg [31:0] dBus_cmd_payload_data,
    output reg [1:0]  dBus_cmd_payload_size,
-
+   output reg        dBus_cmd_payload_wr, //1 - write, 0 - read
+   input wire [31:0] dBus_rsp_data,
+   input wire        dBus_rsp_valid,
+   input wire        dBus_rsp_error,
   
   
    input wire        clk, rstf);
 
    reg [31:0]        pc_addr;
+   wire              pc_addr_inc;
+
+   localparam PC_SIZE = 32;
+   
 
    always @(posedge clk) 
      if(~rstf) 
@@ -29,7 +36,7 @@ module riscv
        pc_addr <= jump_addr[PC_SIZE-1:2];
 
    // Decode
-   enum              wire [6:0] {OP_LUI = 7'b0110111
+   enum              logic [6:0] {OP_LUI = 7'b0110111
                                  , OP_AUIPC = 7'b0010111
                                  , OP_JAL = 7'b1101111
                                  , OP_JALR = 7'b1100111
@@ -64,7 +71,7 @@ module riscv
    assign op_alu_reg = (opcode == OP_ALU_REG);
 
    wire                         instr_lui;
-   wire                         instr_auipic;
+   wire                         instr_auipc;
    wire                         instr_jal;
    wire                         instr_jalr;
 
@@ -275,7 +282,6 @@ module riscv
       endcase // case (alu_type)
    end // always @ (*)
 
-   assign xregs[rd] = alu_res;
    
 
    wire branch_taken;
@@ -293,7 +299,37 @@ module riscv
 
    assign jump_addr = instr_jalr ? rs1_value + imm : pc + imm;
    
+   enum logic [1:0]  { SIZE_BYTE = 2'd0,
+                      SIZE_HALF = 2'd1,
+                      SIZE_WORD = 2'd2 } mem_size;
+
+   assign mem_size = (instr_lb | instr_lbu | instr_sb) ? SIZE_BYTE :
+                     (instr_lh | instr_lhu | instr_sh) ? SIZE_HALF : SIZE_WORD;
+   
+
+   assign dBus_cmd_payload_addr = alu_res;
+   assign dBus_cmd_payload_data = rs2_value;
+   assign dBus_cmd_payload_size = mem_size == 0 ? 4'b0001:
+                                  mem_size == 1 ? 4'b0011:
+                                  mem_size == 2 ? 4'b1111:0;
+   assign dBus_cmd_payload_wr = op_store;
+   assign dBus_cmd_valid = 1;
+
+   wire [31:0]      mem_rdata;
+   assign mem_rdata = (mem_size == SIZE_BYTE) ? { {24{dBus_rsp_data[7]}}, dBus_rsp_data[7:0]} :
+                      (mem_size == SIZE_HALF) ? { {16{dBus_rsp_data[15]}}, dBus_rsp_data[15:0]} :
+                      dBus_rsp_data;
+
    
    
+   wire             rd_value;
+   wire             rd_we;
+   
+   assign rd_value = op_load ? mem_rdata : alur_res;
+   assign rd_we = ~(op_branch | op_store);
+
+   always @(posedge clk)
+     if(rd_we)
+       xregs[rd] = alu_res;
    
 endmodule // riscv
