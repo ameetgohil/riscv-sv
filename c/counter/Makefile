@@ -7,18 +7,18 @@ START=../inc/start.S
 
 default: all
 
-all: compile objcopy
+all: compile genmemfiles
 
 compile:
 	rm -rf build
 	mkdir build
 	$(RISCV_COMPILER) -g -march=rv32i -mabi=ilp32 -nostdlib -T $(LD) $(START) ./src/main.c -o build/counter.o -Wl,-Map,build/counter.map,--print-memory-usage
 
-objcopy:
+genmemfiles:
 	$(RISCV_OBJCOPY) -O ihex build/counter.o build/counter.hex
 	$(RISCV_OBJCOPY) -O binary build/counter.o build/counter.bin
 	$(RISCV_OBJDUMP) -S -d build/counter.o > build/counter.asm
 	$(RISCV_OBJDUMP) -t build/counter.o > build/counter_symbols.txt
-
+	../../scripts/word_to_byte_mem.py build/counter.bin build/counter_
 
 
