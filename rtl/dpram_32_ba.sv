@@ -2,10 +2,10 @@
 module dpram_32b_ba
   #(
     parameter DEPTH = 8192,
-    parameter MEM_0_INIT = "mem.mif",
-    parameter MEM_1_INIT = "mem.mif",
-    parameter MEM_2_INIT = "mem.mif",
-    parameter MEM_3_INIT = "mem.mif"
+    parameter MEM0_INIT = "mem.mif",
+    parameter MEM1_INIT = "mem.mif",
+    parameter MEM2_INIT = "mem.mif",
+    parameter MEM3_INIT = "mem.mif"
     )
    (
     input wire                      t_p0_valid,
@@ -39,10 +39,10 @@ module dpram_32b_ba
    reg [7:0]                        mem3 [DEPTH] /* synthesis syn_ramstyle = "block_ram" */;
 
    initial begin
-      $readmemh(MEM_0_INIT, mem0);
-      $readmemh(MEM_1_INIT, mem0);
-      $readmemh(MEM_2_INIT, mem0);
-      $readmemh(MEM_3_INIT, mem0);
+      $readmemb(MEM0_INIT, mem0);
+      $readmemb(MEM1_INIT, mem0);
+      $readmemb(MEM2_INIT, mem0);
+      $readmemb(MEM3_INIT, mem0);
    end
 
    wire [$clog(DEPTH)-1:0] addr0, addr1; //addr0 for port 0, addr1 for port1
