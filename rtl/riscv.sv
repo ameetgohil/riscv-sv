@@ -6,13 +6,13 @@ module riscv
    output reg [31:0] iBus_cmd_payload_pc,
    input wire        iBus_rsp_ready,
    input wire        iBus_rsp_err,
-   input wire [31:0] iBus_rsp_inst,
+   input wire [31:0] iBus_rsp_instr,
    /* Data Bus */
    output reg        dBus_cmd_valid,
    input wire        dBus_cmd_ready,
-   output reg [31:0] dBus_cmd_payload_address,
+   output reg [31:0] dBus_cmd_payload_addr,
    output reg [31:0] dBus_cmd_payload_data,
-   output reg [1:0]  dBus_cmd_payload_size,
+   output reg [3:0]  dBus_cmd_payload_size,
    output reg        dBus_cmd_payload_wr, //1 - write, 0 - read
    input wire [31:0] dBus_rsp_data,
    input wire        dBus_rsp_valid,
@@ -21,20 +21,15 @@ module riscv
   
    input wire        clk, rstf);
 
-   reg [31:0]        pc_addr;
-   wire              pc_addr_inc;
+
+   reg [31:0]        xregs[32];
+   
+   reg [31:0]        pc;
 
    localparam PC_SIZE = 32;
    
 
-   always @(posedge clk) 
-     if(~rstf) 
-       pc_addr <= 0;
-     else if(pc_addr_inc)
-       pc_addr <= pc_addr + 1;
-     else
-       pc_addr <= jump_addr[PC_SIZE-1:2];
-
+   
    // Decode
    enum              logic [6:0] {OP_LUI = 7'b0110111
                                  , OP_AUIPC = 7'b0010111
@@ -51,12 +46,12 @@ module riscv
    wire [4:0]                   rs1, rs2;
    wire [6:0]                   funct7;
 
-   assign opcode = iBus_rsp_inst[6:0];
-   assign rd = iBus_rsp_inst[11:7];
-   assign funct3 = iBus_rsp_inst[14:12];
-   assign rs1 = iBus_rsp_inst[19:15];
-   assign rs2 = iBus_rsp_inst[24:20];
-   assign funct7 = iBus_rsp_inst[31:25];
+   assign opcode = iBus_rsp_instr[6:0];
+   assign rd = iBus_rsp_instr[11:7];
+   assign funct3 = iBus_rsp_instr[14:12];
+   assign rs1 = iBus_rsp_instr[19:15];
+   assign rs2 = iBus_rsp_instr[24:20];
+   assign funct7 = iBus_rsp_instr[31:25];
 
    wire                         op_branch;
    wire                         op_load;
@@ -105,6 +100,14 @@ module riscv
    assign instr_lw = op_load && (funct3 == 3'b010);
    assign instr_lbu = op_load && (funct3 == 3'b100);
    assign instr_lhu = op_load && (funct3 == 3'b101);
+
+   wire                         instr_sb;
+   wire                         instr_sh;
+   wire                         instr_sw;
+
+   assign instr_sb = op_store && (funct3 == 3'b000);
+   assign instr_sh = op_store && (funct3 == 3'b001);
+   assign instr_sw = op_store && (funct3 == 3'b010);
 
    wire                         instr_addi;
    wire                         instr_slti;
@@ -177,7 +180,7 @@ module riscv
    wire [31:0]                  i_imm;
    wire [31:0]                  s_imm;
 
-   wire                         imm;
+   wire [31:0]                  imm;
 
    assign u_imm = { iBus_rsp_instr[31:12], 12'h0 };
    assign j_imm = { {12{iBus_rsp_instr[31]}}, iBus_rsp_instr[19:12], iBus_rsp_instr[20], iBus_rsp_instr[30:21], 1'b0 };
@@ -207,7 +210,7 @@ module riscv
                    (instr_sub) ? ALU_SUB:
                    (instr_sll | instr_slli) ? ALU_SLL:
                    (instr_slt | instr_slti) ? ALU_SLT:
-                   (instr_sltu | instr_sltui) ? ALU_SLTU:
+                   (instr_sltu | instr_sltiu) ? ALU_SLTU:
                    (instr_xor | instr_xori) ? ALU_XOR:
                    (instr_srl | instr_srli) ? ALU_SRL:
                    (instr_sra | instr_srai) ? ALU_SRA:
@@ -322,14 +325,27 @@ module riscv
 
    
    
-   wire             rd_value;
+   wire [31:0]      rd_value;
    wire             rd_we;
    
-   assign rd_value = op_load ? mem_rdata : alur_res;
+   assign rd_value = op_load ? mem_rdata : alu_res;
    assign rd_we = ~(op_branch | op_store);
 
    always @(posedge clk)
      if(rd_we)
        xregs[rd] = alu_res;
+
+
+   
+   always @(posedge clk) 
+     if(~rstf) 
+       pc <= 0;
+     else if(branch_taken)
+       pc <= jump_addr[PC_SIZE-1:0];
+     else
+       pc <= pc + 'd4;
+
+   assign iBus_cmd_valid = 1'b1;
+   assign iBus_cmd_payload_pc = pc;
    
 endmodule // riscv

@@ -59,6 +59,10 @@ module dpram_32b_ba
    
    always @(posedge clk)
      i_p0_valid <= ~t_p0_we && t_p0_valid;
+
+`ifdef ZERO_READ
+   assign i_p0_data[0] = mem0[addr0];
+`endif
    
    always @(posedge clk) begin
       i_p0_data[0] <= mem0[addr0];
@@ -68,6 +72,10 @@ module dpram_32b_ba
       end
    end
 
+`ifdef ZERO_READ
+   assign i_p0_data[1] = mem1[addr0];
+`endif
+   
    always @(posedge clk) begin
       i_p0_data[1] <= mem1[addr0];
       if(t_p0_mask[1] & t_p0_valid & t_p0_we) begin
@@ -76,6 +84,10 @@ module dpram_32b_ba
       end
    end
 
+`ifdef ZERO_READ
+   assign i_p0_data[2] = mem2[addr0];
+`endif
+   
    always @(posedge clk) begin
       i_p0_data[2] <= mem2[addr0];
       if(t_p0_mask[2] & t_p0_valid & t_p0_we) begin
@@ -84,6 +96,10 @@ module dpram_32b_ba
       end
    end
 
+`ifdef ZERO_READ
+   assign i_p0_data[3] = mem3[addr0];
+`endif
+   
    always @(posedge clk) begin
       i_p0_data[3] <= mem3[addr0];
       if(t_p0_mask[3] & t_p0_valid & t_p0_we) begin
@@ -102,34 +118,51 @@ module dpram_32b_ba
    always @(posedge clk)
      i_p1_valid <= ~t_p1_we && t_p1_valid;
 
+`ifdef ZERO_READ
+   assign i_p1_data[0] = mem0[addr1];
+`endif
+
+   
    always @(posedge clk) begin
-      i_p1_data[0] <= mem0[addr0];
+      i_p1_data[0] <= mem0[addr1];
       if(t_p1_mask[0] & t_p1_valid & t_p1_we) begin
-         mem0[addr0] <= t_p1_data[0];
+         mem0[addr1] <= t_p1_data[0];
          i_p1_data[0] <= t_p1_data[0];
       end
    end
 
+`ifdef ZERO_READ
+   assign i_p1_data[1] = mem1[addr1];
+`endif
+   
    always @(posedge clk) begin
-      i_p1_data[1] <= mem1[addr0];
+      i_p1_data[1] <= mem1[addr1];
       if(t_p1_mask[1] & t_p1_valid & t_p1_we) begin
-         mem1[addr0] <= t_p1_data[1];
+         mem1[addr1] <= t_p1_data[1];
          i_p1_data[1] <= t_p1_data[1];
       end
    end
 
+`ifdef ZERO_READ
+   assign i_p1_data[2] = mem2[addr1];
+`endif
+   
    always @(posedge clk) begin
-      i_p1_data[2] <= mem2[addr0];
+      i_p1_data[2] <= mem2[addr1];
       if(t_p1_mask[2] & t_p1_valid & t_p1_we) begin
-         mem2[addr0] <= t_p1_data[2];
+         mem2[addr1] <= t_p1_data[2];
          i_p1_data[2] <= t_p1_data[2];
       end
    end
 
+`ifdef ZERO_READ
+   assign i_p1_data[3] = mem3[addr1];
+`endif
+   
    always @(posedge clk) begin
-      i_p1_data[3] <= mem3[addr0];
+      i_p1_data[3] <= mem3[addr1];
       if(t_p1_mask[3] & t_p1_valid & t_p1_we) begin
-         mem3[addr0] <= t_p1_data[3];
+         mem3[addr1] <= t_p1_data[3];
          i_p1_data[3] <= t_p1_data[3];
       end
    end
