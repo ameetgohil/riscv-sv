@@ -44,9 +44,6 @@ module dpram_32_ba
       $readmemh(MEM1_INIT, mem1);
       $readmemh(MEM2_INIT, mem2);
       $readmemh(MEM3_INIT, mem3);
-      for(integer i = 0; i < 264; i++)
-        $display(mem0[i]);
-      
    end
 
    wire [$clog2(DEPTH)-1:0] addr0, addr1; //addr0 for port 0, addr1 for port1
