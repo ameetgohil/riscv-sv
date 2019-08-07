@@ -33,16 +33,20 @@ module dpram_32_ba
     input wire                      clk, rstf
     );
 
-   reg [7:0]                        mem0 [DEPTH] /* synthesis syn_ramstyle = "block_ram" */;
-   reg [7:0]                        mem1 [DEPTH] /* synthesis syn_ramstyle = "block_ram" */;
-   reg [7:0]                        mem2 [DEPTH] /* synthesis syn_ramstyle = "block_ram" */;
-   reg [7:0]                        mem3 [DEPTH] /* synthesis syn_ramstyle = "block_ram" */;
+   reg [7:0]                        mem0 [264] /* synthesis syn_ramstyle = "block_ram" */;
+   reg [7:0]                        mem1 [264] /* synthesis syn_ramstyle = "block_ram" */;
+   reg [7:0]                        mem2 [264] /* synthesis syn_ramstyle = "block_ram" */;
+   reg [7:0]                        mem3 [264] /* synthesis syn_ramstyle = "block_ram" */;
 
+   /* verilator lint_off WIDTH */
    initial begin
-      $readmemb(MEM0_INIT, mem0);
-      $readmemb(MEM1_INIT, mem0);
-      $readmemb(MEM2_INIT, mem0);
-      $readmemb(MEM3_INIT, mem0);
+      $readmemh(MEM0_INIT, mem0);
+      $readmemh(MEM1_INIT, mem1);
+      $readmemh(MEM2_INIT, mem2);
+      $readmemh(MEM3_INIT, mem3);
+      for(integer i = 0; i < 264; i++)
+        $display(mem0[i]);
+      
    end
 
    wire [$clog2(DEPTH)-1:0] addr0, addr1; //addr0 for port 0, addr1 for port1
