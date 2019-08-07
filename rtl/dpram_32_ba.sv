@@ -1,5 +1,5 @@
 // Byte addressable 32bit memory
-module dpram_32b_ba
+module dpram_32_ba
   #(
     parameter DEPTH = 8192,
     parameter MEM0_INIT = "mem.mif",
@@ -11,7 +11,7 @@ module dpram_32b_ba
     input wire                      t_p0_valid,
     output wire                     t_p0_ready,
     input wire                      t_p0_we,
-    input wire [$clog(DEPTH)+2-1:0] t_p0_addr, // +2 b/c byte addressable
+    input wire [$clog2(DEPTH)+2-1:0] t_p0_addr, // +2 b/c byte addressable
     input wire [3:0][7:0]           t_p0_data,
     input wire [3:0]                t_p0_mask,
 
@@ -22,7 +22,7 @@ module dpram_32b_ba
     input wire                      t_p1_valid,
     output wire                     t_p1_ready,
     input wire                      t_p1_we,
-    input wire [$clog(DEPTH)+2-1:0] t_p1_addr,
+    input wire [$clog2(DEPTH)+2-1:0] t_p1_addr,
     input wire [3:0][7:0]           t_p1_data,
     input wire [3:0]                t_p1_mask,
 
@@ -45,10 +45,10 @@ module dpram_32b_ba
       $readmemb(MEM3_INIT, mem0);
    end
 
-   wire [$clog(DEPTH)-1:0] addr0, addr1; //addr0 for port 0, addr1 for port1
+   wire [$clog2(DEPTH)-1:0] addr0, addr1; //addr0 for port 0, addr1 for port1
 
-   assign addr0 = t_p0_addr[$clog(DEPTH)+2-1:2];
-   assign addr1 = t_p1_addr[$clog(DEPTH)+2-1:2];
+   assign addr0 = t_p0_addr[$clog2(DEPTH)+2-1:2];
+   assign addr1 = t_p1_addr[$clog2(DEPTH)+2-1:2];
 
 
    /**********************************************
