@@ -41,7 +41,6 @@ module dpram_32_ba
    reg [3:0][7:0]            p0_dout;
    reg [3:0][7:0]            p1_dout;
    
-   /* verilator lint_off WIDTH */
    initial begin
       $readmemh(MEM0_INIT, mem0);
       $readmemh(MEM1_INIT, mem1);
