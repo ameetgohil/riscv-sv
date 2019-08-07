@@ -33,10 +33,10 @@ module dpram_32_ba
     input wire                      clk, rstf
     );
 
-   reg [7:0]                        mem0 [264] /* synthesis syn_ramstyle = "block_ram" */;
-   reg [7:0]                        mem1 [264] /* synthesis syn_ramstyle = "block_ram" */;
-   reg [7:0]                        mem2 [264] /* synthesis syn_ramstyle = "block_ram" */;
-   reg [7:0]                        mem3 [264] /* synthesis syn_ramstyle = "block_ram" */;
+   reg [7:0]                        mem0 [DEPTH] /* synthesis syn_ramstyle = "block_ram" */;
+   reg [7:0]                        mem1 [DEPTH] /* synthesis syn_ramstyle = "block_ram" */;
+   reg [7:0]                        mem2 [DEPTH] /* synthesis syn_ramstyle = "block_ram" */;
+   reg [7:0]                        mem3 [DEPTH] /* synthesis syn_ramstyle = "block_ram" */;
 
    /* verilator lint_off WIDTH */
    initial begin
