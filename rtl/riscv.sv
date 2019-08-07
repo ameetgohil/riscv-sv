@@ -333,7 +333,7 @@ module riscv
 
    always @(posedge clk)
      if(rd_we)
-       xregs[rd] = alu_res;
+       xregs[rd] <= alu_res;
 
 
    
