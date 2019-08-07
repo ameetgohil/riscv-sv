@@ -29,19 +29,19 @@ with open(inFileStr, "rb") as inFile:
         char = inFile.read(1)
         if(char):
             if(cnt % 4 == 0):
-                outFile0.write("@" + str(addr) + "\n")
+                outFile0.write("@" + "{0:x}".format(addr) + "\n")
                 outFile0.write(codecs.encode(char, "hex").decode("utf-8"))
                 outFile0.write("\n")
             elif(cnt % 4 == 1):
-                outFile1.write("@" + str(addr) + "\n")
+                outFile1.write("@" + "{0:x}".format(addr) + "\n")
                 outFile1.write(codecs.encode(char, "hex").decode("utf-8"))
                 outFile1.write("\n")
             elif(cnt % 4 == 2):
-                outFile2.write("@" + str(addr) + "\n")
+                outFile2.write("@" + "{0:x}".format(addr) + "\n")
                 outFile2.write(codecs.encode(char, "hex").decode("utf-8"))
                 outFile2.write("\n")
             else:
-                outFile3.write("@" + str(addr) + "\n")
+                outFile3.write("@" + "{0:x}".format(addr) + "\n")
                 outFile3.write(codecs.encode(char, "hex").decode("utf-8"))
                 outFile3.write("\n")
                 addr += 1
