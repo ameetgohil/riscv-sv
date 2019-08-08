@@ -62,7 +62,7 @@ module riscv
    assign op_branch = (opcode == OP_BRANCH);
    assign op_load = (opcode == OP_LOAD);
    assign op_store = (opcode == OP_STORE);
-   assign op_alu_imm = (opcode == OP_ALU_IMM);
+   assign op_alu_imm = (opcode == OP_ALU_IMM) | (opcode == OP_LUI);
    assign op_alu_reg = (opcode == OP_ALU_REG);
 
    wire                         instr_lui;
@@ -206,7 +206,7 @@ module riscv
                       ALU_AND,
                       ALU_AUIPC } alu_type;
 
-   assign alu_type = (instr_add | instr_addi) ? ALU_ADD:
+   assign alu_type = (instr_add | instr_addi | instr_lui | op_load | op_store) ? ALU_ADD:
                    (instr_sub) ? ALU_SUB:
                    (instr_sll | instr_slli) ? ALU_SLL:
                    (instr_slt | instr_slti) ? ALU_SLT:
@@ -235,6 +235,11 @@ module riscv
                       instr_bgeu ? BR_GEU:
                       instr_jump ? BR_JUMP:BR_NONE;
 
+   wire [4:0] rs1_index;
+   wire [4:0] rs2_index;
+   
+   assign rs1_index = (instr_lui | instr_auipc | instr_jal) ? 5'h0:rs1;
+   assign rs2_index = (op_load | instr_jump | op_alu_imm) ? 5'h0:rs2;
 
    wire op_is_imm;
 
@@ -243,11 +248,14 @@ module riscv
    wire [31:0] rs1_value;
    wire [31:0] rs2_value;
 
-   assign rs1_value = xregs[rs1];
-   assign rs2_value = xregs[rs2];
+   assign rs1_value = xregs[rs1_index];
+   assign rs2_value = xregs[rs2_index];
    
-   wire [31:0] alu_srca = rs1_value;
-   wire [31:0] alu_srcb = rs2_value;
+   wire [31:0] alu_srca;
+   wire [31:0] alu_srcb;
+   
+   assign alu_srca = rs1_value;
+   //assign alu_srcb = rs2_value;
 
 
    assign alu_srcb = op_is_imm ? imm : rs2_value;
@@ -285,7 +293,6 @@ module riscv
       endcase // case (alu_type)
    end // always @ (*)
 
-   
 
    wire branch_taken;
    
@@ -316,7 +323,7 @@ module riscv
                                   mem_size == 1 ? 4'b0011:
                                   mem_size == 2 ? 4'b1111:0;
    assign dBus_cmd_payload_wr = op_store;
-   assign dBus_cmd_valid = 1;
+   assign dBus_cmd_valid = op_store | op_load;
 
    wire [31:0]      mem_rdata;
    assign mem_rdata = (mem_size == SIZE_BYTE) ? { {24{dBus_rsp_data[7]}}, dBus_rsp_data[7:0]} :
@@ -324,17 +331,17 @@ module riscv
                       dBus_rsp_data;
 
    
+
    
    wire [31:0]      rd_value;
    wire             rd_we;
    
-   assign rd_value = op_load ? mem_rdata : alu_res;
+   assign rd_value = (op_load | op_store) ? mem_rdata : alu_res;
    assign rd_we = ~(op_branch | op_store);
 
    always @(posedge clk)
      if(rd_we)
-       xregs[rd] <= alu_res;
-
+       xregs[rd] <= rd_value;
 
    
    always @(posedge clk) 
