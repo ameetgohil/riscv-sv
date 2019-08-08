@@ -296,14 +296,13 @@ module riscv
 
    wire branch_taken;
    
-   assign branch_taken = 
-        (BR_JUMP == branch_type) ? 1'b1 :
-        (BR_EQ   == branch_type) ? rs1_value == rs2_value :
-        (BR_NE   == branch_type) ? rs1_value != rs2_value :
-        (BR_LT   == branch_type) ? rs1_value < rs2_value :
-        (BR_GE   == branch_type) ? $signed(rs1_value) >= $signed(rs2_value) :
-        (BR_LTU  == branch_type) ? rs1_value <= rs2_value :
-        (BR_GEU  == branch_type) ? rs1_value >= rs2_value : 1'b0;
+   assign branch_taken = (BR_JUMP == branch_type) ? 1'b1 :
+                         (BR_EQ   == branch_type) ? rs1_value == rs2_value :
+                         (BR_NE   == branch_type) ? rs1_value != rs2_value :
+                         (BR_LT   == branch_type) ? $signed(rs1_value) < $signed(rs2_value) :
+                         (BR_GE   == branch_type) ? $signed(rs1_value) >= $signed(rs2_value) :
+                         (BR_LTU  == branch_type) ? rs1_value < rs2_value :
+                         (BR_GEU  == branch_type) ? rs1_value >= rs2_value : 1'b0;
    
    wire [31:0] jump_addr;
 
