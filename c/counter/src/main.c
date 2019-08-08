@@ -3,8 +3,8 @@ int main() {
     
     int count = 0;
     while(1) {
-	if(count < 10)
-	    count++;
+	//	if(count < 10)
+	count++;
 	x3=count;
     }
     return 0;
