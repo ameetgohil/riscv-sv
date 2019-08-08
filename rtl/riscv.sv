@@ -301,7 +301,7 @@ module riscv
         (BR_EQ   == branch_type) ? rs1_value == rs2_value :
         (BR_NE   == branch_type) ? rs1_value != rs2_value :
         (BR_LT   == branch_type) ? rs1_value < rs2_value :
-        (BR_GE   == branch_type) ? rs1_value > rs2_value :
+        (BR_GE   == branch_type) ? $signed(rs1_value) >= $signed(rs2_value) :
         (BR_LTU  == branch_type) ? rs1_value <= rs2_value :
         (BR_GEU  == branch_type) ? rs1_value >= rs2_value : 1'b0;
    
