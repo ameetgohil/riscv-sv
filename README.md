@@ -16,6 +16,7 @@ cd c/counter
 make
 
 cd ../../sim
+nvm use || nvm install
 npm i
 make
 
