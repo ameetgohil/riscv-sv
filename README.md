@@ -1,5 +1,5 @@
 # riscv-sv
-RISC-V implementation
+RISC-V rv32i implementation 
 
 # Dependencies
 - RISC-V gcc tools
