@@ -1,6 +1,6 @@
-RISCV_COMPILER=$(RISCV)/bin/riscv32-unknown-elf-gcc
-RISCV_OBJCOPY=$(RISCV)/bin/riscv32-unknown-elf-objcopy
-RISCV_OBJDUMP=$(RISCV)/bin/riscv32-unknown-elf-objdump
+RISCV_COMPILER=$(RISCV)/bin/riscv64-unknown-elf-gcc
+RISCV_OBJCOPY=$(RISCV)/bin/riscv64-unknown-elf-objcopy
+RISCV_OBJDUMP=$(RISCV)/bin/riscv64-unknown-elf-objdump
 LD=../inc/link.ld
 START=../inc/start.S
 
