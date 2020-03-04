@@ -1,33 +1,47 @@
 module riscv_top
-  (input wire clk, rstf
+  (
+   output wire debug_uart_tx_data,
+   output wire debug_uart_tx_valid,
+   input wire  debug_uart_tx_ready,
+   input wire  clk, rstf
    );
 
    localparam DEPTH = 8192;
    
    
-    wire        iBus_cmd_valid;
-    wire        iBus_cmd_ready;
-    wire [31:0] iBus_cmd_payload_pc;
-    wire        iBus_rsp_ready;
-    wire        iBus_rsp_err;
-    wire [31:0] iBus_rsp_instr;
+   wire        iBus_cmd_valid;
+   wire        iBus_cmd_ready;
+   wire [31:0] iBus_cmd_payload_pc;
+   wire        iBus_rsp_ready;
+   wire        iBus_rsp_err;
+   wire [31:0] iBus_rsp_instr;
    /* Data Bus */
-    wire        dBus_cmd_valid;
-    wire        dBus_cmd_ready;
-    wire [31:0] dBus_cmd_payload_addr;
-    wire [31:0] dBus_cmd_payload_data;
-    wire [3:0]  dBus_cmd_payload_size;
-    wire        dBus_cmd_payload_wr; //1 - write, 0 - read
-    wire [31:0] dBus_rsp_data;
-    wire        dBus_rsp_valid;
-    wire        dBus_rsp_error;
+   wire        dBus_cmd_valid;
+   wire        dBus_cmd_ready;
+   wire [31:0] dBus_cmd_payload_addr;
+   wire [31:0] dBus_cmd_payload_data;
+   wire [3:0]  dBus_cmd_payload_size;
+   wire        dBus_cmd_payload_wr; //1 - write, 0 - read
+   wire [31:0] dBus_rsp_data;
+   wire        dBus_rsp_valid;
+   wire        dBus_rsp_error;
 
    assign iBus_rsp_err = 1'b0;
    assign dBus_rsp_error = 1'b0;
    
    riscv riscv_0p
-                (.*);
-
+     (.*);
+   
+   reg [$clog2(DEPTH)-1:0] datamem_addr;
+   reg [31:0]              datamem_wdata;
+   reg [3:0]               datamem_mask;
+   reg                     datamem_we;
+   reg                     datamem_wvalid;
+   wire                    datamem_ready;
+   
+   wire [31:0]             datamem_rdata;
+   wire [31:0]             datamem_rvalid;
+   
    dpram_32_ba 
      #(.DEPTH(DEPTH),
        .MEM0_INIT(`MEM0_INIT),
@@ -60,9 +74,128 @@ module riscv_top
         .rstf(rstf)
         );
 
-   databus_demux databus_demux_inst
-     
 
+   wire [31:0]             m_axi_awaddr;
+   wire                    m_axi_awprot;
+   wire                    m_axi_awvalid;
+   wire                    m_axi_awready;
+
+   wire [31:0]             m_axi_wdata;
+   wire                    m_axi_wstrb;
+   wire                    m_axi_wvalid;
+   wire                    m_axi_wready;
+
+   wire [1:0]              m_axi_bresp;
+   wire                    m_axi_bvalid;
+   wire                    m_axi_bready;
+
+   wire                    m_axi_arvalid;
+   wire                    m_axi_arready;
+   wire [31:0]             m_axi_araddr;
+   wire                    m_axi_arprot;
+
+   wire                    m_axi_rvalid;
+   wire                    m_axi_rready;
+   wire [31:0]             m_axi_rdata;
+   wire [3:0]              m_axi_rresp;
+   
+   databus_demux databus_demux_inst
+     (.*
+      );
+   
+
+   wire [31:0]             uart_axi_awaddr;
+   wire                    uart_axi_awprot;
+   wire                    uart_axi_awvalid;
+   wire                    uart_axi_awready;
+
+   wire [31:0]             uart_axi_wdata;
+   wire                    uart_axi_wstrb;
+   wire                    uart_axi_wvalid;
+   wire                    uart_axi_wready;
+
+   wire [1:0]              uart_axi_bresp;
+   wire                    uart_axi_bvalid;
+   wire                    uart_axi_bready;
+
+   wire                    uart_axi_arvalid;
+   wire                    uart_axi_arready;
+   wire [31:0]             uart_axi_araddr;
+   wire                    uart_axi_arprot;
+
+   wire                    uart_axi_rvalid;
+   wire                    uart_axi_rready;
+   wire [31:0]             uart_axi_rdata;
+   wire [3:0]              uart_axi_rresp;
+   
+   axi_lite_crossbar axi_lite_crossbar_0
+     (.*,
+      .s0_axi_awaddr(uart_axi_awaddr),
+      .s0_axi_awprot(uart_axi_awprot),
+      .s0_axi_awvalid(uart_axi_awvalid),
+      .s0_axi_awready(uart_axi_awready),
+
+      .s0_axi_wdata(uart_axi_wdata),
+      .s0_axi_wstrb(uart_axi_wstrb),
+      .s0_axi_wvalid(uart_axi_wvalid),
+      .s0_axi_wready(uart_axi_wready),
+      
+      .s0_axi_bresp(uart_axi_bresp),
+      .s0_axi_bvalid(uart_axi_bvalid),
+      .s0_axi_bready(uart_axi_bready),
+      
+      .s0_axi_arvalid(uart_axi_arvalid),
+      .s0_axi_arready(uart_axi_arready),
+      .s0_axi_araddr(uart_axi_araddr),
+      .s0_axi_arprot(uart_axi_arprot),
+      
+      .s0_axi_rvalid(uart_axi_rvalid),
+      .s0_axi_rready(uart_axi_rready),
+      .s0_axi_rdata(uart_axi_rdata),
+      .s0_axi_rresp(uart_axi_rresp),
+      
+      .aclk(clk),
+      .aresetn(rstf),
+      );
+
+
+   axi2axis uart_axis
+     (
+      .s_axi_awaddr(uart_axi_awaddr),
+      .s_axi_awprot(uart_axi_awprot),
+      .s_axi_awvalid(uart_axi_awvalid),
+      .s_axi_awready(uart_axi_awready),
+
+      .s_axi_wdata(uart_axi_wdata),
+      .s_axi_wstrb(uart_axi_wstrb),
+      .s_axi_wvalid(uart_axi_wvalid),
+      .s_axi_wready(uart_axi_wready),
+      
+      .s_axi_bresp(uart_axi_bresp),
+      .s_axi_bvalid(uart_axi_bvalid),
+      .s_axi_bready(uart_axi_bready),
+      
+      .s_axi_arvalid(uart_axi_arvalid),
+      .s_axi_arready(uart_axi_arready),
+      .s_axi_araddr(uart_axi_araddr),
+      .s_axi_arprot(uart_axi_arprot),
+      
+      .s_axi_rvalid(uart_axi_rvalid),
+      .s_axi_rready(uart_axi_rready),
+      .s_axi_rdata(uart_axi_rdata),
+      .s_axi_rresp(uart_axi_rresp),
+
+      .m_axis_wdata(debug_uart_tx_data),
+      .m_axis_wvalid(debug_uart_tx_valid),
+      .m_axis_wready(1'b1),//uart_tx_ready),
+
+      .m_axis_rdata(uart_rx_data),
+      .m_axis_rvalid(uart_rx_data),
+      .m_axis_rready(uart_rx_ready),
+      
+      .aclk(clk),
+      .aresetn(rstf)
+      );
    
 
    
