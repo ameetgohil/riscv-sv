@@ -1,36 +1,164 @@
 module riscv
   (
    /* Instruction Bus */
-   output reg 	     iBus_cmd_valid,
-   input wire 	     iBus_cmd_ready,
+   output reg       iBus_cmd_valid,
+   input wire       iBus_cmd_ready,
    output reg [31:0] iBus_cmd_payload_pc,
-   input wire 	     iBus_rsp_ready,
-   input wire 	     iBus_rsp_err,
+   input wire       iBus_rsp_ready,
+   input wire       iBus_rsp_err,
    input wire [31:0] iBus_rsp_instr,
    /* Data Bus */
-   output reg 	     dBus_cmd_valid,
-   input wire 	     dBus_cmd_ready,
+   output reg       dBus_cmd_valid,
+   input wire       dBus_cmd_ready,
    output reg [31:0] dBus_cmd_payload_addr,
    output reg [31:0] dBus_cmd_payload_data,
    output reg [3:0]  dBus_cmd_payload_size,
-   output reg 	     dBus_cmd_payload_wr, //1 - write, 0 - read
+   output reg       dBus_cmd_payload_wr, //1 - write, 0 - read
    input wire [31:0] dBus_rsp_data,
-   input wire 	     dBus_rsp_valid,
-   input wire 	     dBus_rsp_error,
+   input wire       dBus_rsp_valid,
+   input wire       dBus_rsp_error,
   
   
-   input wire 	     clk, rstf);
+   input wire       clk, rstf);
 
 
-   reg [31:0] 	     xregs[32];
+   reg [31:0]       xregs[32];
    
-   reg [31:0] 	     pc;
+   reg [31:0]       pc;
+   reg [31:0] 	    if_pc_1d;
+   reg [31:0] 	    if_pc, id_pc, ex_pc, ma_pc, wb_pc;
+
 
    localparam PC_SIZE = 32;
+
+   wire             stall_if;
+   reg 		    stall_if_1d;
+   wire 	    stall_ma;
+
+   reg 		    if_invalid;
+   reg [31:0] 	    instr_buf;
+   
+   
+   reg [31:0] 	    if_instr, id_instr;
+   
+   //assign pc = if_pc;
+
+   //assign if_pc = pc;
+   reg 		    branch_taken_1d;
    
 
+   assign if_invalid = branch_taken^branch_taken_1d;
+
+   always @(posedge clk)
+     if(~rstf)
+       branch_taken_1d <= 0;
+     else
+       branch_taken_1d <= branch_taken;
+   
+   
+   
+   
+   always @(posedge clk)
+     if(~rstf) begin
+	stall_if_1d <= 0;
+	instr_buf <= 0;
+	//if_pc_1d <= 0;
+	if_pc <= 0;
+     end
+     else begin
+	stall_if_1d <= stall_if;
+	//if_pc_1d <= 0;
+	if(~stall_if_1d)
+	  instr_buf <= iBus_rsp_instr;
+
+	/*if(branch_taken) begin
+	   if_*/
+	//if(~stall_if) begin
+	   if_pc <= if_invalid ? if_pc : pc;
+	   //if_instr <= (stall_if_1d) ? instr_buf : iBus_rsp_instr;
+	//end
+     end // else: !if(~rstf)
+	      
+	      
+   
+   reg 	    ibus_rsp_invalid;
+   always @(posedge clk) 
+     if(~rstf) 
+       ibus_rsp_invalid <= 0;
+     else
+       ibus_rsp_invalid <= ibus_rsp_invalid ? 0:branch_taken;
+   
+    
+   always @(posedge clk) 
+     if(~rstf) begin
+	pc <= 0;
+	//if_pc <= 0;
+     end
+     else if(~stall_if) begin
+	pc <= branch_taken ? jump_addr[PC_SIZE-1:0] : pc + 'd4;
+	//if_pc <= pc;
+     end
+	
+   /*always @(posedge clk)
+     if(~rstf) if_invalid <= 0; else if_invalid <= branch_taken;
+   */
+   assign if_invalid = branch_taken;
+   //assign if_pc = branch_taken ? jump_addr[PC_SIZE-1:0] : if_pc + 'd4;
+
+   wire             stall_for_memory_wait;
+   wire             stall_for_memory_pending;
+   
+   assign stall_for_memory_wait = (~iBus_rsp_ready);
+// | ibus_rsp_invalid);
+   //assign stall_for_memory_pending = 
+     
+   assign stall_if = stall_for_memory_wait | stall_ma;
+
+   /*always_ff @(posedge clk)
+     if(~rstf)
+       if_invalid <= 1;
+     else
+       if_invalid <= branch_taken;
+   */
+   
+   assign iBus_cmd_valid = 1'b1;
+   assign iBus_cmd_payload_pc = pc;
+   
    
    // Decode
+   /*reg [31:0] 	    id_pc_buf;
+   reg 		    branch_taken_1d;
+   always @(posedge clk)
+     if(~rstf) begin
+       id_pc_buf <= 0;
+	branch_taken_1d <= 0;
+     end
+     else begin
+	branch_taken_1d <= branch_taken;
+	if(~stall_if) begin
+	   id_pc_buf <= id_pc;
+	   id_pc <= (branch_taken_1d) ? id_pc_buf:if_pc;
+	end
+     end
+    */
+   
+   assign 	    id_pc = if_pc;
+//ibus_rsp_invalid ? if_pc_1d:if_pc;
+   /*always @(posedge clk)
+     if(~rstf)
+       id_pc <= 0;
+     else if(~stall_ma)
+       id_pc <= branch_taken ? id_pc:if_pc;
+    */
+   /*always @(posedge clk)
+     if(~rstf)
+       id_instr <= 0;
+     else if(~stall_ma)
+       id_instr <= iBus_rsp_instr;*/
+   assign id_instr = stall_if_1d|ibus_rsp_invalid ? instr_buf : iBus_rsp_instr;
+
+   assign if_instr = iBus_rsp_instr;
+   
    localparam OP_LUI = 7'b0110111
                        , OP_AUIPC = 7'b0010111
                        , OP_JAL = 7'b1101111
@@ -41,24 +169,24 @@ module riscv
                        , OP_ALU_IMM = 7'b0010011
                        , OP_ALU_REG = 7'b0110011;
    
-   wire [6:0] 	     opcode;
-   wire [4:0] 	     rd;
-   wire [2:0] 	     funct3;
-   wire [4:0] 	     rs1, rs2;
-   wire [6:0] 	     funct7;
+   wire [6:0] 	    opcode;
+   wire [4:0]       rd;
+   wire [2:0] 	    funct3;
+   wire [4:0] 	    rs1, rs2;
+   wire [6:0] 	    funct7;
+   
+   assign opcode = id_instr[6:0];
+   assign rd = id_instr[11:7];
+   assign funct3 = id_instr[14:12];
+   assign rs1 = id_instr[19:15];
+   assign rs2 = id_instr[24:20];
+   assign funct7 = id_instr[31:25];
 
-   assign opcode = iBus_rsp_instr[6:0];
-   assign rd = iBus_rsp_instr[11:7];
-   assign funct3 = iBus_rsp_instr[14:12];
-   assign rs1 = iBus_rsp_instr[19:15];
-   assign rs2 = iBus_rsp_instr[24:20];
-   assign funct7 = iBus_rsp_instr[31:25];
-
-   wire 	     op_branch;
-   wire 	     op_load;
-   wire 	     op_store;
-   wire 	     op_alu_imm;
-   wire 	     op_alu_reg;
+   wire       op_branch;
+   wire       op_load;
+   wire       op_store;
+   wire       op_alu_imm;
+   wire       op_alu_reg;
 
    assign op_branch = (opcode == OP_BRANCH);
    assign op_load = (opcode == OP_LOAD);
@@ -66,22 +194,22 @@ module riscv
    assign op_alu_imm = (opcode == OP_ALU_IMM) | (opcode == OP_LUI);
    assign op_alu_reg = (opcode == OP_ALU_REG);
 
-   wire 	     instr_lui;
-   wire 	     instr_auipc;
-   wire 	     instr_jal;
-   wire 	     instr_jalr;
+   wire       instr_lui;
+   wire       instr_auipc;
+   wire       instr_jal;
+   wire       instr_jalr;
 
    assign instr_lui = (opcode == OP_LUI);
    assign instr_auipc = (opcode == OP_AUIPC);
    assign instr_jal = (opcode == OP_JAL);
    assign instr_jalr = (opcode == OP_JALR);
 
-   wire 	     instr_beq;
-   wire 	     instr_bne;
-   wire 	     instr_blt;
-   wire 	     instr_bge;
-   wire 	     instr_bltu;
-   wire 	     instr_bgeu;
+   wire       instr_beq;
+   wire       instr_bne;
+   wire       instr_blt;
+   wire       instr_bge;
+   wire       instr_bltu;
+   wire       instr_bgeu;
 
    assign instr_beq = op_branch && (funct3 == 3'b000);
    assign instr_bne = op_branch && (funct3 == 3'b001);
@@ -90,11 +218,11 @@ module riscv
    assign instr_bltu = op_branch && (funct3 == 3'b110);
    assign instr_bgeu = op_branch && (funct3 == 3'b111);
 
-   wire 	     instr_lb;
-   wire 	     instr_lh;
-   wire 	     instr_lw;
-   wire 	     instr_lbu;
-   wire 	     instr_lhu;
+   wire       instr_lb;
+   wire       instr_lh;
+   wire       instr_lw;
+   wire       instr_lbu;
+   wire       instr_lhu;
 
    assign instr_lb = op_load && (funct3 == 3'b000);
    assign instr_lh = op_load && (funct3 == 3'b001);
@@ -102,26 +230,26 @@ module riscv
    assign instr_lbu = op_load && (funct3 == 3'b100);
    assign instr_lhu = op_load && (funct3 == 3'b101);
 
-   wire 	     instr_sb;
-   wire 	     instr_sh;
-   wire 	     instr_sw;
+   wire       instr_sb;
+   wire       instr_sh;
+   wire       instr_sw;
 
    assign instr_sb = op_store && (funct3 == 3'b000);
    assign instr_sh = op_store && (funct3 == 3'b001);
    assign instr_sw = op_store && (funct3 == 3'b010);
 
-   wire 	     instr_addi;
-   wire 	     instr_slti;
-   wire 	     instr_sltiu;
-   wire 	     instr_xori;
-   wire 	     instr_ori;
-   wire 	     instr_andi;
-   wire 	     instr_slli;
-   wire 	     instr_srli;
-   wire 	     instr_srai;
+   wire       instr_addi;
+   wire       instr_slti;
+   wire       instr_sltiu;
+   wire       instr_xori;
+   wire       instr_ori;
+   wire       instr_andi;
+   wire       instr_slli;
+   wire       instr_srli;
+   wire       instr_srai;
 
-   wire 	     funct7_0;
-   wire 	     funct7_32;
+   wire       funct7_0;
+   wire       funct7_32;
 
    assign funct7_0 = (funct7 == 7'b0000000);
    assign funct7_32 = (funct7 == 7'b0100000);
@@ -136,16 +264,16 @@ module riscv
    assign instr_srli = op_alu_imm && (funct3 == 3'b101) && funct7_0;
    assign instr_srai = op_alu_imm && (funct3 == 3'b101) && funct7_32;
    
-   wire 	     instr_add;
-   wire 	     instr_sub;
-   wire 	     instr_sll;
-   wire 	     instr_slt;
-   wire 	     instr_sltu;
-   wire 	     instr_xor;
-   wire 	     instr_srl;
-   wire 	     instr_sra;
-   wire 	     instr_or;
-   wire 	     instr_and;
+   wire       instr_add;
+   wire       instr_sub;
+   wire       instr_sll;
+   wire       instr_slt;
+   wire       instr_sltu;
+   wire       instr_xor;
+   wire       instr_srl;
+   wire       instr_sra;
+   wire       instr_or;
+   wire       instr_and;
 
    assign instr_add = op_alu_reg && (funct3 == 3'b000) && funct7_0;
    assign instr_sub = op_alu_reg && (funct3 == 3'b000) && funct7_32;
@@ -158,13 +286,13 @@ module riscv
    assign instr_or = op_alu_reg && (funct3 == 3'b110) && funct7_0;
    assign instr_and = op_alu_reg && (funct3 == 3'b111) && funct7_0;
    
-   wire 	     instr_load;
-   wire 	     instr_store;
-   wire 	     instr_alu_imm;
-   wire 	     instr_alu_reg;
-   wire 	     instr_branch;
-   wire 	     instr_jump;
-   wire 	     instr_illegal;
+   wire       instr_load;
+   wire       instr_store;
+   wire       instr_alu_imm;
+   wire       instr_alu_reg;
+   wire       instr_branch;
+   wire       instr_jump;
+   wire       instr_illegal;
    
    assign instr_load = instr_lb | instr_lw | instr_lbu | instr_lhu;
    assign instr_store = instr_sb | instr_sh | instr_sw;
@@ -175,19 +303,19 @@ module riscv
    assign instr_illegal = !(instr_load | instr_store | instr_alu_imm | instr_alu_reg | instr_branch | instr_jump);
 
    //extract immediate value
-   wire [31:0] 	     u_imm;
-   wire [31:0] 	     j_imm;
-   wire [31:0] 	     b_imm;
-   wire [31:0] 	     i_imm;
-   wire [31:0] 	     s_imm;
+   wire [31:0]         u_imm;
+   wire [31:0]         j_imm;
+   wire [31:0]         b_imm;
+   wire [31:0]         i_imm;
+   wire [31:0]         s_imm;
 
-   wire [31:0] 	     imm;
+   wire [31:0]         imm;
 
-   assign u_imm = { iBus_rsp_instr[31:12], 12'h0 };
-   assign j_imm = { {12{iBus_rsp_instr[31]}}, iBus_rsp_instr[19:12], iBus_rsp_instr[20], iBus_rsp_instr[30:21], 1'b0 };
-   assign b_imm = { {20{iBus_rsp_instr[31]}}, iBus_rsp_instr[7], iBus_rsp_instr[30:25], iBus_rsp_instr[11:8], 1'b0 };
-   assign i_imm = { {20{iBus_rsp_instr[31]}}, iBus_rsp_instr[31:20] };
-   assign s_imm = { {20{iBus_rsp_instr[31]}}, iBus_rsp_instr[31:25], iBus_rsp_instr[11:7] };
+   assign u_imm = { id_instr[31:12], 12'h0 };
+   assign j_imm = { {12{id_instr[31]}}, id_instr[19:12], id_instr[20], id_instr[30:21], 1'b0 };
+   assign b_imm = { {20{id_instr[31]}}, id_instr[7], id_instr[30:25], id_instr[11:8], 1'b0 };
+   assign i_imm = { {20{id_instr[31]}}, id_instr[31:20] };
+   assign s_imm = { {20{id_instr[31]}}, id_instr[31:25], id_instr[11:7] };
 
    assign imm = (instr_lui | instr_auipc) ? u_imm:
                 instr_jal ? j_imm:
@@ -195,6 +323,10 @@ module riscv
                 (instr_load | instr_jalr | instr_alu_imm) ? i_imm:
                 instr_store ? s_imm:32'h0;
 
+
+   // Ex Stage
+   wire 	       ex_pc = id_pc;
+   
    localparam ALU_ADD = 4'h0,
      ALU_SUB = 4'h1,
      ALU_SLL = 4'h2,
@@ -207,7 +339,7 @@ module riscv
      ALU_AND = 4'h9,
      ALU_AUIPC = 4'hA;
    
-   wire [3:0] 	     alu_type;
+   wire [3:0]       alu_type;
 
    assign alu_type = (instr_add | instr_addi | instr_lui | op_load | op_store) ? ALU_ADD:
                      (instr_sub) ? ALU_SUB:
@@ -230,34 +362,34 @@ module riscv
      BR_GEU = 3'h6,
      BR_JUMP = 3'h7;
    
-   wire [2:0] 	     branch_type;
+   wire [2:0]       branch_type;
 
    assign branch_type = instr_beq ? BR_EQ:
-			instr_bne ? BR_NE:
-			instr_blt ? BR_LT:
-			instr_bge ? BR_GE:
-			instr_bltu ? BR_LTU:
-			instr_bgeu ? BR_GEU:
-			instr_jump ? BR_JUMP:BR_NONE;
+         instr_bne ? BR_NE:
+         instr_blt ? BR_LT:
+         instr_bge ? BR_GE:
+         instr_bltu ? BR_LTU:
+         instr_bgeu ? BR_GEU:
+         instr_jump ? BR_JUMP:BR_NONE;
 
-   wire [4:0] 	     rs1_index;
-   wire [4:0] 	     rs2_index;
+   wire [4:0]       rs1_index;
+   wire [4:0]       rs2_index;
    
    assign rs1_index = (instr_lui | instr_auipc | instr_jal) ? 5'h0:rs1;
    assign rs2_index = (op_load | instr_jump | op_alu_imm) ? 5'h0:rs2;
 
-   wire 	     op_is_imm;
+   wire       op_is_imm;
 
    assign op_is_imm = op_alu_imm | instr_jal | op_load | op_store;
    
-   wire [31:0] 	     rs1_value;
-   wire [31:0] 	     rs2_value;
+   wire [31:0]         rs1_value;
+   wire [31:0]         rs2_value;
 
    assign rs1_value = xregs[rs1_index];
    assign rs2_value = xregs[rs2_index];
    
-   wire [31:0] 	     alu_srca;
-   wire [31:0] 	     alu_srcb;
+   wire [31:0]         alu_srca;
+   wire [31:0]         alu_srcb;
    
    assign alu_srca = rs1_value;
    //assign alu_srcb = rs2_value;
@@ -265,7 +397,7 @@ module riscv
 
    assign alu_srcb = op_is_imm ? imm : rs2_value;
 
-   reg [31:0] 	     alu_res;
+   reg [31:0]       alu_res;
 
    // ALU
 
@@ -311,13 +443,31 @@ module riscv
    
    wire [31:0] jump_addr;
 
-   assign jump_addr = instr_jalr ? rs1_value + imm : pc + imm;
-   
+   assign jump_addr = instr_jalr ? rs1_value + imm : ex_pc + imm;
+
+
+
+   // Memory stage
    localparam SIZE_BYTE = 2'd0,
      SIZE_HALF = 2'd1,
      SIZE_WORD = 2'd2;
    
    wire [1:0]  mem_size;
+   
+   wire [31:0] ma_pc;
+   assign ma_pc = ex_pc;
+   
+   /*always @(posedge clk)
+    if(~rstf)
+       ma_pc <= 0;
+    else if(~stall_ma & ~if_invalid)
+    ma_pc <= ex_pc;
+    */
+   //reg 	       ma_invalid;
+   //always @(posedge clk) if(~rstf) ma_invalid <= 0; else ma_invalid <= if_invalid;
+   wire        ma_invalid = if_invalid;
+
+   assign stall_ma = (dBus_cmd_valid & ~dBus_cmd_ready) | (op_load & ~dBus_rsp_valid);
 
    assign mem_size = (instr_lb | instr_lbu | instr_sb) ? SIZE_BYTE :
                      (instr_lh | instr_lhu | instr_sh) ? SIZE_HALF : SIZE_WORD;
@@ -337,7 +487,11 @@ module riscv
                       dBus_rsp_data;
 
    
+   //Writeback
 
+   wire [31:0] wb_pc;
+   assign wb_pc = ma_pc;
+   
    
    wire [31:0] rd_value;
    wire        rd_we;
@@ -346,19 +500,9 @@ module riscv
    assign rd_we = ~(op_branch | op_store);
 
    always @(posedge clk)
-     if(rd_we)
+     if(rd_we & ~stall_ma)
        xregs[rd] <= rd_value;
 
    
-   always @(posedge clk) 
-     if(~rstf) 
-       pc <= 0;
-     else if(branch_taken)
-       pc <= jump_addr[PC_SIZE-1:0];
-     else
-       pc <= pc + 'd4;
-
-   assign iBus_cmd_valid = 1'b1;
-   assign iBus_cmd_payload_pc = pc;
    
 endmodule // riscv
