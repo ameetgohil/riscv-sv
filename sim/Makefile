@@ -32,7 +32,8 @@ VERILATOR = $(VERILATOR_ROOT)/bin/verilator
 VERILATOR_COVERAGE = $(VERILATOR_ROOT)/bin/verilator_coverage
 endif
 
-VERILATOR_USER_ARGS ?= -DMEM0_INIT=\"../c/counter/build/counter_mem0.bin\" -DMEM1_INIT=\"../c/counter/build/counter_mem1.bin\" -DMEM2_INIT=\"../c/counter/build/counter_mem2.bin\" -DMEM3_INIT=\"../c/counter/build/counter_mem3.bin\" -DZERO_READ
+VERILATOR_USER_ARGS ?= -DMEM0_INIT=\"../c/counter/build/counter_mem0.bin\" -DMEM1_INIT=\"../c/counter/build/counter_mem1.bin\" -DMEM2_INIT=\"../c/counter/build/counter_mem2.bin\" -DMEM3_INIT=\"../c/counter/build/counter_mem3.bin\"
+#-DZERO_READ
 
 VERILATOR_FLAGS = $(VERILATOR_USER_ARGS)
 # Generate C++ in executable form
