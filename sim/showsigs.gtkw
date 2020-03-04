@@ -1,22 +1,22 @@
 [*]
-[*] GTKWave Analyzer v3.3.98 (w)1999-2019 BSI
-[*] Wed Aug  7 05:56:42 2019
+[*] GTKWave Analyzer v3.3.101 (w)1999-2019 BSI
+[*] Fri Feb 28 03:46:26 2020
 [*]
 [dumpfile] "/home/qubits/proj/riscv-sv/sim/logs/top.fst"
-[dumpfile_mtime] "Wed Aug  7 05:52:15 2019"
-[dumpfile_size] 35162
+[dumpfile_mtime] "Fri Feb 28 03:35:32 2020"
+[dumpfile_size] 122772
 [savefile] "/home/qubits/proj/riscv-sv/sim/showsigs.gtkw"
-[timestart] 0
-[size] 1870 1016
+[timestart] 84
+[size] 2490 1376
 [pos] -1 -1
-*-5.000000 54 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-2.000000 99 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.riscv_top.
 [sst_width] 261
 [signals_width] 246
 [sst_expanded] 1
-[sst_vpaned_height] 288
-@201
+[sst_vpaned_height] 829
+@200
 ----DBUS---
 @28
 TOP.riscv_top.riscv_0p.clk
@@ -33,6 +33,20 @@ TOP.riscv_top.riscv_0p.dBus_rsp_data[31:0]
 @28
 TOP.riscv_top.riscv_0p.dBus_rsp_error
 TOP.riscv_top.riscv_0p.dBus_rsp_valid
+@200
+----PC---
+@22
+TOP.riscv_top.riscv_0p.pc[31:0]
+TOP.riscv_top.riscv_0p.if_pc[31:0]
+TOP.riscv_top.riscv_0p.id_pc[31:0]
+TOP.riscv_top.riscv_0p.ex_pc[31:0]
+TOP.riscv_top.riscv_0p.ma_pc[31:0]
+TOP.riscv_top.riscv_0p.wb_pc[31:0]
+@200
+----STALL---
+@28
+TOP.riscv_top.riscv_0p.stall_if
+TOP.riscv_top.riscv_0p.stall_ma
 @200
 ----REGS---
 @22
@@ -51,7 +65,9 @@ TOP.riscv_top.riscv_0p.xregs(11)[31:0]
 TOP.riscv_top.riscv_0p.xregs(12)[31:0]
 TOP.riscv_top.riscv_0p.xregs(13)[31:0]
 TOP.riscv_top.riscv_0p.xregs(14)[31:0]
+@23
 TOP.riscv_top.riscv_0p.xregs(15)[31:0]
+@22
 TOP.riscv_top.riscv_0p.xregs(16)[31:0]
 TOP.riscv_top.riscv_0p.xregs(17)[31:0]
 TOP.riscv_top.riscv_0p.xregs(18)[31:0]
