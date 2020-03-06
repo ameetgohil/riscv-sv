@@ -61,6 +61,8 @@ module axi_lite_crossbar
    reg                read_addr_done, read_data_done;
    reg                write_addr_done, write_data_done;
 
+   reg                invalid_rstate, invalid_wstate;
+   
    // READ
    always_comb begin
       read_addr_done = 0;
@@ -68,14 +70,14 @@ module axi_lite_crossbar
       if(r_state == ADDR && m_axi_arvalid) begin
          case(m_axi_araddr)
            {20'h00010,12'h???}: begin
-              m_axi_arvalid = s0_axi_arvalid;
-              m_axi_araddr = s0_axi_araddr;
-              s0_axi_arready = m_axi_arready;
-              read_addr_done = m_axi_arready;
+              s0_axi_arvalid = m_axi_arvalid;
+              s0_axi_araddr = m_axi_araddr;
+              m_axi_arready = s0_axi_arready;
+              read_addr_done = s0_axi_arready;
               n_select = 2'b01;
            end
            default: begin
-              s0_axi_arready = 1'b1;
+              m_axi_arready = 1'b1;
            end
          endcase // case (m_axi_awaddr)
       end // if (state == ADDR && m_axi_awvalid)
@@ -83,7 +85,7 @@ module axi_lite_crossbar
          case(q_select)
            2'b01: begin // s0
               m_axi_rdata = s0_axi_rdata;
-              m_axi_rstrb = s0_axi_rstrb;
+              //m_axi_rstrb = s0_axi_rstrb;
               m_axi_rvalid = s0_axi_rvalid;
               s0_axi_rready = m_axi_rready;
            end

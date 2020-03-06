@@ -36,11 +36,15 @@ module axi2axis
     ADDR 1: Pending RX
     */
 
+   typedef enum reg   {ADDR, DATA} state_t;
+   state_t w_state, r_state;
+
+   
    reg               q_write_stream, n_write_stream;
    
    always_comb begin
       n_write_stream = 1'b0;
-      m_axis_wdata = s_axis_wdata;
+      m_axis_wdata = m_axis_wdata;
       m_axis_wvalid = 0;
       s_axi_wready = 0;
       if(w_state == ADDR && s_axi_awvalid) begin

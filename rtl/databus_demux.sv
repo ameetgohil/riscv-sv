@@ -56,6 +56,8 @@ module databus_demux
 
    localparam ST_ADDR = 0;
    localparam ST_DATA = 1;
+
+   reg                                     axi_state;
    
 
    always_comb begin
@@ -64,29 +66,29 @@ module databus_demux
          datamem_wdata = dBus_cmd_payload_data;
          datamem_mask = dBus_cmd_payload_size;
          datamem_we = dBus_cmd_payload_wr;
-         dBus_cmd_payload_ready = datamem_ready;
+         dBus_cmd_ready = datamem_ready;
 
          dBus_rsp_data = datamem_rdata;
          dBus_rsp_valid = datamem_rvalid;
          
       end
       else begin
-         if(dBus_cmd_payload_wr & dBus_cmd_payload_valid && axi_state == ADDR) begin
+         if(dBus_cmd_payload_wr & dBus_cmd_valid && axi_state == ST_ADDR) begin
             m_axi_awaddr = dBus_cmd_payload_addr;
             m_axi_awvalid = 1'b1;
          end
-         else if(dBus_cmd_payload_wr & dBus_cmd_payload_valid && axi_state == DATA) begin
+         else if(dBus_cmd_payload_wr & dBus_cmd_valid && axi_state == ST_DATA) begin
             m_axi_wdata = dBus_cmd_payload_data;
             m_axi_wvalid = 1'b1;
             dBus_cmd_ready = m_axi_wready;
          end
-         else if(~dBus_cmd_payload_wr & dBus_cmd_payload_valid && axi_state == ADDR) begin
+         else if(~dBus_cmd_payload_wr & dBus_cmd_valid && axi_state == ST_ADDR) begin
             m_axi_araddr = dBus_cmd_payload_addr;
             m_axi_arvalid = 1'b1;
          end
-         else if(~dBus_cmd_payload_wr & dBus_cmd_payload_valid && axi_state == DATA) begin
+         else if(~dBus_cmd_payload_wr & dBus_cmd_valid && axi_state == ST_DATA) begin
             dBus_rsp_data = m_axi_rdata;
-            dBus_rsp_rvalid = m_axi_rvalid;
+            dBus_rsp_valid = m_axi_rvalid;
          end
       end
    end // always_comb

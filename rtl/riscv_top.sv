@@ -155,9 +155,14 @@ module riscv_top
       .s0_axi_rresp(uart_axi_rresp),
       
       .aclk(clk),
-      .aresetn(rstf),
+      .aresetn(rstf)
       );
 
+   wire [7:0]              uart_rx_data;
+   wire                    uart_rx_valid, uart_rx_ready;
+
+   assign uart_rx_data = 0;
+   assign uart_rx_valid = 0;
 
    axi2axis uart_axis
      (
@@ -170,11 +175,11 @@ module riscv_top
       .s_axi_wstrb(uart_axi_wstrb),
       .s_axi_wvalid(uart_axi_wvalid),
       .s_axi_wready(uart_axi_wready),
-      
+      /*
       .s_axi_bresp(uart_axi_bresp),
       .s_axi_bvalid(uart_axi_bvalid),
       .s_axi_bready(uart_axi_bready),
-      
+      */
       .s_axi_arvalid(uart_axi_arvalid),
       .s_axi_arready(uart_axi_arready),
       .s_axi_araddr(uart_axi_araddr),
