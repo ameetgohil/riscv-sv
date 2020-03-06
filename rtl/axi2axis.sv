@@ -43,8 +43,15 @@ module axi2axis
    reg               q_write_stream, n_write_stream;
    
    always_comb begin
+      m_axis_rready = 0;
+      s_axi_rdata = 0;
+      s_axi_rvalid = 0;
+      s_axi_arprot = 0;
+      
+      
+      
       n_write_stream = 1'b0;
-      m_axis_wdata = m_axis_wdata;
+      m_axis_wdata = s_axi_wdata;
       m_axis_wvalid = 0;
       s_axi_wready = 0;
       if(w_state == ADDR && s_axi_awvalid) begin
@@ -69,10 +76,17 @@ module axi2axis
    always @(posedge aclk) begin
       if(~aresetn) begin
          q_write_stream <= 0;
+         w_state <= ADDR;
       end
-      else
-        if((s_axi_awvalid & s_axi_awready) | (s_axi_wvalid & s_axi_wready))
-          q_write_stream <= n_write_stream;
+      else begin
+         if((s_axi_awvalid & s_axi_awready) | (s_axi_wvalid & s_axi_wready))
+           q_write_stream <= n_write_stream;
+         
+         if(s_axi_awvalid & s_axi_awready)
+           w_state <= DATA;
+         else if(s_axi_wvalid & s_axi_wready)
+           w_state <= ADDR;
+      end
    end
 
    

@@ -1,9 +1,9 @@
 module riscv_top
   (
-   output wire debug_uart_tx_data,
-   output wire debug_uart_tx_valid,
-   input wire  debug_uart_tx_ready,
-   input wire  clk, rstf
+   output wire [31:0] debug_uart_tx_data,
+   output wire      debug_uart_tx_valid,
+   input wire       debug_uart_tx_ready,
+   input wire       clk, rstf
    );
 
    localparam DEPTH = 8192;
@@ -40,7 +40,7 @@ module riscv_top
    wire                    datamem_ready;
    
    wire [31:0]             datamem_rdata;
-   wire [31:0]             datamem_rvalid;
+   wire                    datamem_rvalid;
    
    dpram_32_ba 
      #(.DEPTH(DEPTH),
@@ -158,7 +158,7 @@ module riscv_top
       .aresetn(rstf)
       );
 
-   wire [7:0]              uart_rx_data;
+   wire [31:0]              uart_rx_data;
    wire                    uart_rx_valid, uart_rx_ready;
 
    assign uart_rx_data = 0;
@@ -195,7 +195,7 @@ module riscv_top
       .m_axis_wready(1'b1),//uart_tx_ready),
 
       .m_axis_rdata(uart_rx_data),
-      .m_axis_rvalid(uart_rx_data),
+      .m_axis_rvalid(uart_rx_valid),
       .m_axis_rready(uart_rx_ready),
       
       .aclk(clk),

@@ -3,49 +3,49 @@ module axi_lite_crossbar
    input wire [31:0]  m_axi_awaddr,
    input wire         m_axi_awprot,
    input wire         m_axi_awvalid,
-   output wire        m_axi_awready,
+   output reg        m_axi_awready,
   
    input wire [31:0]  m_axi_wdata,
    input wire         m_axi_wstrb,
    input wire         m_axi_wvalid,
-   output wire        m_axi_wready,
+   output reg        m_axi_wready,
   
-   output wire [1:0]  m_axi_bresp,
-   output wire        m_axi_bvalid,
+   output reg [1:0]  m_axi_bresp,
+   output reg        m_axi_bvalid,
    input wire         m_axi_bready,
   
    input wire         m_axi_arvalid,
-   output wire        m_axi_arready,
+   output reg        m_axi_arready,
    input wire [31:0]  m_axi_araddr,
    input wire         m_axi_arprot,
   
-   output wire        m_axi_rvalid,
+   output reg        m_axi_rvalid,
    input wire         m_axi_rready,
-   output wire [31:0] m_axi_rdata,
-   output wire [3:0]  m_axi_rresp,
+   output reg [31:0] m_axi_rdata,
+   output reg [3:0]  m_axi_rresp,
   
    //slave 0
-   output wire [31:0] s0_axi_awaddr,
-   output wire        s0_axi_awprot,
-   output wire        s0_axi_awvalid,
+   output reg [31:0] s0_axi_awaddr,
+   output reg        s0_axi_awprot,
+   output reg        s0_axi_awvalid,
    input wire         s0_axi_awready,
 
-   output wire [31:0] s0_axi_wdata,
-   output wire        s0_axi_wstrb,
-   output wire        s0_axi_wvalid,
+   output reg [31:0] s0_axi_wdata,
+   output reg        s0_axi_wstrb,
+   output reg        s0_axi_wvalid,
    input wire         s0_axi_wready,
 
    input wire [1:0]   s0_axi_bresp,
    input wire         s0_axi_bvalid,
-   output wire        s0_axi_bready,
+   output reg        s0_axi_bready,
 
-   output wire        s0_axi_arvalid,
+   output reg        s0_axi_arvalid,
    input wire         s0_axi_arready,
-   output wire [31:0] s0_axi_araddr,
-   output wire        s0_axi_arprot,
+   output reg [31:0] s0_axi_araddr,
+   output reg        s0_axi_arprot,
 
    input wire         s0_axi_rvalid,
-   output wire        s0_axi_rready,
+   output reg        s0_axi_rready,
    input wire [31:0]  s0_axi_rdata,
    input wire [3:0]   s0_axi_rresp,
 
@@ -62,13 +62,26 @@ module axi_lite_crossbar
    reg                write_addr_done, write_data_done;
 
    reg                invalid_rstate, invalid_wstate;
+
+   //bresp
+   always_comb begin
+      m_axi_bresp = 0;
+      m_axi_bvalid = 0;
+      s0_axi_bready = 0;
+   end
    
    // READ
    always_comb begin
+      m_axi_rdata = s0_axi_rdata;
+      m_axi_rresp = 0;
+      
+      //m_axi_rready = 0;
+      s0_axi_arprot = 0;
+      
       read_addr_done = 0;
       read_data_done = 0;
       if(r_state == ADDR && m_axi_arvalid) begin
-         case(m_axi_araddr)
+         casez(m_axi_araddr)
            {20'h00010,12'h???}: begin
               s0_axi_arvalid = m_axi_arvalid;
               s0_axi_araddr = m_axi_araddr;
@@ -98,10 +111,12 @@ module axi_lite_crossbar
    
    // WRITE
    always_comb begin
+      s0_axi_awprot = 0;
+      
       write_addr_done = 0;
       write_data_done = 0;
       if(w_state == ADDR && m_axi_awvalid) begin
-         case(m_axi_awaddr)
+         casez(m_axi_awaddr)
            {20'h00010,12'h???}: begin
               s0_axi_awvalid = m_axi_awvalid;
               s0_axi_awaddr = m_axi_awaddr;
