@@ -22,30 +22,30 @@ module databus_demux
     input wire                             datamem_rvalid,
 
     //PERIPHERALS and other memory AXI-lite
-    output wire [31:0]                     m_axi_awaddr,
-    output wire                            m_axi_awprot,
-    output wire                            m_axi_awvalid,
+    output reg [31:0]                      m_axi_awaddr,
+    output reg                             m_axi_awprot,
+    output reg                             m_axi_awvalid,
     input wire                             m_axi_awready,
 
-    output wire [31:0]                     m_axi_wdata,
-    output wire                            m_axi_wstrb,
-    output wire                            m_axi_wvalid,
+    output reg [31:0]                      m_axi_wdata,
+    output reg                             m_axi_wstrb,
+    output reg                             m_axi_wvalid,
     input wire                             m_axi_wready,
 
     input wire [1:0]                       m_axi_bresp,
     input wire                             m_axi_bvalid,
-    output wire                            m_axi_bready,
+    output reg                             m_axi_bready,
 
-    output wire                            m_axi_arvalid,
+    output reg                             m_axi_arvalid,
     input wire                             m_axi_arready,
-    output wire [31:0]                     m_axi_araddr,
-    output wire                            m_axi_arprot,
+    output reg [31:0]                      m_axi_araddr,
+    output reg                             m_axi_arprot,
 
     input wire                             m_axi_rvalid,
-    output wire                            m_axi_rready,
+    output reg                             m_axi_rready,
     input wire [31:0]                      m_axi_rdata,
     input wire [3:0]                       m_axi_rresp,
-    
+   
 
    
 
@@ -61,11 +61,19 @@ module databus_demux
    
 
    always_comb begin
+      m_axi_awprot = 0;
+      m_axi_arprot = 0;
+      m_axi_wstrb = 0;
+      m_axi_bready = 1'b1;
+      m_axi_rready = 1'b1;
+      dBus_rsp_error = 0;
+      
       if(dBus_cmd_payload_addr[31:$clog2(DATAMEM_DEPTH)] == 0) begin // data mem
          datamem_addr = dBus_cmd_payload_addr[$clog2(DATAMEM_DEPTH)-1:0];
          datamem_wdata = dBus_cmd_payload_data;
          datamem_mask = dBus_cmd_payload_size;
          datamem_we = dBus_cmd_payload_wr;
+         datamem_wvalid = dBus_cmd_payload_wr;
          dBus_cmd_ready = datamem_ready;
 
          dBus_rsp_data = datamem_rdata;
@@ -105,7 +113,7 @@ module databus_demux
       end
    end // always_ff @ (posedge clk or negedge rstf)
    
-         
+   
    
    
 endmodule
