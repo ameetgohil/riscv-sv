@@ -36,7 +36,7 @@ module riscv_top
    reg [31:0]              datamem_wdata;
    reg [3:0]               datamem_mask;
    reg                     datamem_we;
-   reg                     datamem_wvalid;
+   reg                     datamem_valid;
    wire                    datamem_ready;
    
    wire [31:0]             datamem_rdata;
@@ -60,9 +60,9 @@ module riscv_top
         .i_p0_ready(1'b1),
         .i_p0_data(iBus_rsp_instr),
 
-        .t_p1_valid(datamem_wvalid | datamem_rvalid),
+        .t_p1_valid(datamem_valid),
         .t_p1_ready(datamem_ready),
-        .t_p1_we(datamem_wvalid),
+        .t_p1_we(datamem_we),
         .t_p1_addr(datamem_addr[$clog2(DEPTH)+2-1:0]),
         .t_p1_data(datamem_wdata),
         .t_p1_mask(datamem_mask),
