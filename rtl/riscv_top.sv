@@ -32,7 +32,7 @@ module riscv_top
    riscv riscv_0p
      (.*);
    
-   reg [$clog2(DEPTH)-1:0] datamem_addr;
+   reg [$clog2(DEPTH)+2-1:0] datamem_addr;
    reg [31:0]              datamem_wdata;
    reg [3:0]               datamem_mask;
    reg                     datamem_we;
@@ -60,6 +60,18 @@ module riscv_top
         .i_p0_ready(1'b1),
         .i_p0_data(iBus_rsp_instr),
 
+        .t_p1_valid(datamem_wvalid | datamem_rvalid),
+        .t_p1_ready(datamem_ready),
+        .t_p1_we(datamem_wvalid),
+        .t_p1_addr(datamem_addr[$clog2(DEPTH)+2-1:0]),
+        .t_p1_data(datamem_wdata),
+        .t_p1_mask(datamem_mask),
+
+        .i_p1_valid(datamem_rvalid),
+        .i_p1_ready(1'b1),
+        .i_p1_data(datamem_rdata),
+
+/*
         .t_p1_valid(dBus_cmd_valid),
         .t_p1_ready(dBus_cmd_ready),
         .t_p1_we(dBus_cmd_payload_wr),
@@ -70,6 +82,8 @@ module riscv_top
         .i_p1_valid(dBus_rsp_valid),
         .i_p1_ready(1'b1),
         .i_p1_data(dBus_rsp_data),
+
+ */      
         .clk(clk),
         .rstf(rstf)
         );
@@ -114,10 +128,10 @@ module riscv_top
    wire                    uart_axi_wvalid;
    wire                    uart_axi_wready;
 
-   wire [1:0]              uart_axi_bresp;
+/*   wire [1:0]              uart_axi_bresp;
    wire                    uart_axi_bvalid;
    wire                    uart_axi_bready;
-
+*/
    wire                    uart_axi_arvalid;
    wire                    uart_axi_arready;
    wire [31:0]             uart_axi_araddr;
@@ -140,9 +154,11 @@ module riscv_top
       .s0_axi_wvalid(uart_axi_wvalid),
       .s0_axi_wready(uart_axi_wready),
       
-      .s0_axi_bresp(uart_axi_bresp),
-      .s0_axi_bvalid(uart_axi_bvalid),
-      .s0_axi_bready(uart_axi_bready),
+      .s0_axi_bresp(2'b0),
+      .s0_axi_bvalid(1'b0),
+      /* verilator lint_off PINCONNECTEMPTY */
+      .s0_axi_bready(),
+       /* verilator lint_on PINCONNECTEMPTY */
       
       .s0_axi_arvalid(uart_axi_arvalid),
       .s0_axi_arready(uart_axi_arready),

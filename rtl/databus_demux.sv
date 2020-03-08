@@ -11,7 +11,7 @@ module databus_demux
     output reg                             dBus_rsp_error,
 
     //DATA MEMORY (internal bram)
-    output reg [$clog2(DATAMEM_DEPTH)-1:0] datamem_addr,
+    output reg [$clog2(DATAMEM_DEPTH)+2-1:0] datamem_addr,
     output reg [31:0]                      datamem_wdata,
     output reg [3:0]                       datamem_mask,
     output reg                             datamem_we,
@@ -68,8 +68,8 @@ module databus_demux
       m_axi_rready = 1'b1;
       dBus_rsp_error = 0;
       
-      if(dBus_cmd_payload_addr[31:$clog2(DATAMEM_DEPTH)] == 0) begin // data mem
-         datamem_addr = dBus_cmd_payload_addr[$clog2(DATAMEM_DEPTH)-1:0];
+      if(dBus_cmd_payload_addr[31:$clog2(DATAMEM_DEPTH)+2] == 0) begin // data mem
+         datamem_addr = dBus_cmd_payload_addr[$clog2(DATAMEM_DEPTH)+2-1:0];
          datamem_wdata = dBus_cmd_payload_data;
          datamem_mask = dBus_cmd_payload_size;
          datamem_we = dBus_cmd_payload_wr;
@@ -101,7 +101,7 @@ module databus_demux
       end
    end // always_comb
 
-   always_ff @(posedge clk or negedge rstf) begin
+   always_ff @(posedge clk) begin
       if(~rstf) begin
          axi_state <= ST_ADDR;
       end

@@ -11,14 +11,14 @@ module axi2axis
    output reg        s_axi_wready,
 
    input wire        s_axi_arvalid,
-   input wire        s_axi_arready,
+   output reg        s_axi_arready,
    input wire [31:0] s_axi_araddr,
    output reg        s_axi_arprot,
 
    output reg        s_axi_rvalid,
    input wire        s_axi_rready,
    output reg [31:0] s_axi_rdata,
-   input wire [3:0]  s_axi_rresp,
+   output wire [3:0]  s_axi_rresp,
 
    output reg [31:0] m_axis_wdata,
    output reg        m_axis_wvalid,
@@ -48,6 +48,8 @@ module axi2axis
       s_axi_rvalid = 0;
       s_axi_arprot = 0;
       
+      s_axi_arready = 1'b1;
+      s_axi_rresp = 0;
       
       
       n_write_stream = 1'b0;
