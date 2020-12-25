@@ -24,10 +24,16 @@ module instruction_writeback
    always_comb t_instr_ready = 1'b1;
    
    always_comb rd = t_instr[11:7];
+
+      /* verilator lint_off UNUSED */
+   opcode_t op_debug;
+   always_comb op_debug = opcode_t'(t_instr`opcode);
+   /* verilator lint_on UNUSED */
+
    
    always_comb begin
       case(opcode_t'(t_instr`opcode))
-        OP_JALR: begin
+        OP_JAL: begin
            rdValue = iPC + 4;
            we = 1'b1;
         end
