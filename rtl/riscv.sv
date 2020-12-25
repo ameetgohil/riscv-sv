@@ -1,357 +1,201 @@
 module riscv
-  (
-   /* Instruction Bus */
-   output reg        iBus_cmd_valid,
-   input wire        iBus_cmd_ready,
-   output reg [31:0] iBus_cmd_payload_pc,
-   input wire        iBus_rsp_ready,
-   input wire        iBus_rsp_err,
-   input wire [31:0] iBus_rsp_instr,
-   /* Data Bus */
-   output reg        dBus_cmd_valid,
-   input wire        dBus_cmd_ready,
-   output reg [31:0] dBus_cmd_payload_addr,
-   output reg [31:0] dBus_cmd_payload_data,
-   output reg [3:0]  dBus_cmd_payload_size,
-   output reg        dBus_cmd_payload_wr, //1 - write, 0 - read
-   input wire [31:0] dBus_rsp_data,
-   input wire        dBus_rsp_valid,
-   input wire        dBus_rsp_error,
-  
-  
-   input wire        clk, rstf);
+  (output wire [31:0] iBus_cmd_payload_pc,
+   output wire        iBus_cmd_valid,
+   input wire         iBus_rsp_ready,
+   input wire [31:0]  iBus_rsp_instr,
 
+   output wire        dBus_cmd_valid,
+   input wire         dBus_cmd_ready,
+   output wire [31:0] dBus_cmd_payload_addr,
+   output wire [31:0] dBus_cmd_payload_data,
+   output wire [3:0]  dBus_cmd_payload_size,
+   output wire        dBus_cmd_payload_wr, //1 - write, 0 - read
+   input wire [31:0]  dBus_rsp_data,
+   input wire         dBus_rsp_valid,
+   input wire         dBus_rsp_error,
+/*   output wire [31:0] instr,
+   output wire instr_valid,
+   output wire instr_ready,
+*/
+   input wire         clk, rstf
+   );
 
-   reg [31:0]        xregs[32];
+   wire [31:0] regfile_rs1Value;
+   wire [31:0] regfile_rs2Value;
+
+   wire [31:0] fetch_instr;
+   wire        fetch_instr_valid;
+   wire fetch_instr_ready;
+   wire [31:0] fetch_pc;
+
+   wire [31:0] decode_instr;
+   wire        decode_instr_valid;
+   wire        decode_instr_ready;
+   wire [31:0] decode_pc;
+   wire [4:0] decode_rs1;
+   wire [4:0] decode_rs2;
+   wire [4:0] decode_rd;
+   wire [4:0] decode_decodedOP;
+   wire [31:0] decode_immediate;
+
+   wire [31:0] execute_instr;
+   wire        execute_instr_valid;
+   wire        execute_instr_ready;
+   wire [31:0] execute_pc;
+   wire [4:0]  execute_decodedOP;
+   wire [31:0] execute_aluValue;
+   wire [31:0] execute_rs2Value;
+   wire        execute_branchTaken;
+
+   wire [31:0] memoryaccess_instr;
+   wire        memoryaccess_instr_valid;
+   wire        memoryaccess_instr_ready;
+   wire [31:0] memoryaccess_pc;
+   wire [4:0]  memoryaccess_decodedOP;
+   wire [31:0] memoryaccess_maAluValue;
+
+   wire [31:0] writeback_rdValue;
+   wire        writeback_we;
+   wire [4:0]  writeback_rd;
    
-   reg [31:0]        pc;
-
-   localparam PC_SIZE = 32;
    
-
    
-   // Decode
-   enum              logic [6:0] {OP_LUI = 7'b0110111
-                                 , OP_AUIPC = 7'b0010111
-                                 , OP_JAL = 7'b1101111
-                                 , OP_JALR = 7'b1100111
-                                 , OP_BRANCH = 7'b1100011
-                                 , OP_LOAD = 7'b0000011
-                                 , OP_STORE = 7'b0100011
-                                 , OP_ALU_IMM = 7'b0010011
-                                 , OP_ALU_REG = 7'b0110011
-                                 } opcode;
-   wire [4:0]                   rd;
-   wire [2:0]                   funct3;
-   wire [4:0]                   rs1, rs2;
-   wire [6:0]                   funct7;
-
-   assign opcode = iBus_rsp_instr[6:0];
-   assign rd = iBus_rsp_instr[11:7];
-   assign funct3 = iBus_rsp_instr[14:12];
-   assign rs1 = iBus_rsp_instr[19:15];
-   assign rs2 = iBus_rsp_instr[24:20];
-   assign funct7 = iBus_rsp_instr[31:25];
-
-   wire                         op_branch;
-   wire                         op_load;
-   wire                         op_store;
-   wire                         op_alu_imm;
-   wire                         op_alu_reg;
-
-   assign op_branch = (opcode == OP_BRANCH);
-   assign op_load = (opcode == OP_LOAD);
-   assign op_store = (opcode == OP_STORE);
-   assign op_alu_imm = (opcode == OP_ALU_IMM) | (opcode == OP_LUI);
-   assign op_alu_reg = (opcode == OP_ALU_REG);
-
-   wire                         instr_lui;
-   wire                         instr_auipc;
-   wire                         instr_jal;
-   wire                         instr_jalr;
-
-   assign instr_lui = (opcode == OP_LUI);
-   assign instr_auipc = (opcode == OP_AUIPC);
-   assign instr_jal = (opcode == OP_JAL);
-   assign instr_jalr = (opcode == OP_JALR);
-
-   wire                         instr_beq;
-   wire                         instr_bne;
-   wire                         instr_blt;
-   wire                         instr_bge;
-   wire                         instr_bltu;
-   wire                         instr_bgeu;
-
-   assign instr_beq = op_branch && (funct3 == 3'b000);
-   assign instr_bne = op_branch && (funct3 == 3'b001);
-   assign instr_blt = op_branch && (funct3 == 3'b100);
-   assign instr_bge = op_branch && (funct3 == 3'b101);
-   assign instr_bltu = op_branch && (funct3 == 3'b110);
-   assign instr_bgeu = op_branch && (funct3 == 3'b111);
-
-   wire                         instr_lb;
-   wire                         instr_lh;
-   wire                         instr_lw;
-   wire                         instr_lbu;
-   wire                         instr_lhu;
-
-   assign instr_lb = op_load && (funct3 == 3'b000);
-   assign instr_lh = op_load && (funct3 == 3'b001);
-   assign instr_lw = op_load && (funct3 == 3'b010);
-   assign instr_lbu = op_load && (funct3 == 3'b100);
-   assign instr_lhu = op_load && (funct3 == 3'b101);
-
-   wire                         instr_sb;
-   wire                         instr_sh;
-   wire                         instr_sw;
-
-   assign instr_sb = op_store && (funct3 == 3'b000);
-   assign instr_sh = op_store && (funct3 == 3'b001);
-   assign instr_sw = op_store && (funct3 == 3'b010);
-
-   wire                         instr_addi;
-   wire                         instr_slti;
-   wire                         instr_sltiu;
-   wire                         instr_xori;
-   wire                         instr_ori;
-   wire                         instr_andi;
-   wire                         instr_slli;
-   wire                         instr_srli;
-   wire                         instr_srai;
-
-   wire                         funct7_0;
-   wire                         funct7_32;
-
-   assign funct7_0 = (funct7 == 7'b0000000);
-   assign funct7_32 = (funct7 == 7'b0100000);
-
-   assign instr_addi = op_alu_imm && (funct3 == 3'b000);
-   assign instr_slti = op_alu_imm && (funct3 == 3'b010);
-   assign instr_sltiu = op_alu_imm && (funct3 == 3'b011);
-   assign instr_xori = op_alu_imm && (funct3 == 3'b100);
-   assign instr_ori = op_alu_imm && (funct3 == 3'b110);
-   assign instr_andi = op_alu_imm && (funct3 == 3'b111);
-   assign instr_slli = op_alu_imm && (funct3 == 3'b001) && funct7_0;
-   assign instr_srli = op_alu_imm && (funct3 == 3'b101) && funct7_0;
-   assign instr_srai = op_alu_imm && (funct3 == 3'b101) && funct7_32;
    
-   wire                         instr_add;
-   wire                         instr_sub;
-   wire                         instr_sll;
-   wire                         instr_slt;
-   wire                         instr_sltu;
-   wire                         instr_xor;
-   wire                         instr_srl;
-   wire                         instr_sra;
-   wire                         instr_or;
-   wire                         instr_and;
+   regfile u_regfile
+     (.addrA(decode_rs1),
+      .regA(regfile_rs1Value),
+      .addrB(decode_rs2),
+      .regB(regfile_rs2Value),
+      .addrDest(writeback_rd),
+      .dataDest(writeback_rdValue),
+      .weDest(writeback_we),
+      .clk(clk),
+      .rstf(rstf)
+      );
 
-   assign instr_add = op_alu_reg && (funct3 == 3'b000) && funct7_0;
-   assign instr_sub = op_alu_reg && (funct3 == 3'b000) && funct7_32;
-   assign instr_sll = op_alu_reg && (funct3 == 3'b001) && funct7_0;
-   assign instr_slt = op_alu_reg && (funct3 == 3'b010) && funct7_0;
-   assign instr_sltu = op_alu_reg && (funct3 == 3'b011) && funct7_0;
-   assign instr_xor = op_alu_reg && (funct3 == 3'b100) && funct7_0;
-   assign instr_srl = op_alu_reg && (funct3 == 3'b101) && funct7_0;
-   assign instr_sra = op_alu_reg && (funct3 == 3'b101) && funct7_32;
-   assign instr_or = op_alu_reg && (funct3 == 3'b110) && funct7_0;
-   assign instr_and = op_alu_reg && (funct3 == 3'b111) && funct7_0;
-   
-   wire                         instr_load;
-   wire                         instr_store;
-   wire                         instr_alu_imm;
-   wire                         instr_alu_reg;
-   wire                         instr_branch;
-   wire                         instr_jump;
-   wire                         instr_illegal;
-   
-   assign instr_load = instr_lb | instr_lw | instr_lbu | instr_lhu;
-   assign instr_store = instr_sb | instr_sh | instr_sw;
-   assign instr_alu_imm = instr_addi | instr_slti | instr_sltiu | instr_xori | instr_ori | instr_andi | instr_slli | instr_srli | instr_srai;
-   assign instr_alu_reg = instr_add | instr_sub | instr_sll | instr_slt | instr_sltu | instr_xor | instr_srl | instr_sra | instr_or | instr_or | instr_and;
-   assign instr_branch = instr_beq | instr_bne | instr_blt | instr_bge | instr_bltu | instr_bgeu;
-   assign instr_jump = instr_jal | instr_jalr;
-   assign instr_illegal = !(instr_load | instr_store | instr_alu_imm | instr_alu_reg | instr_branch | instr_jump);
+   instruction_fetch u_fetch
+     (.ibus_addr(iBus_cmd_payload_pc),
+      .valid(iBus_cmd_valid),
+      .ready(iBus_rsp_ready),
+      .ibus_instr(iBus_rsp_instr),
 
-   //extract immediate value
-   wire [31:0]                  u_imm;
-   wire [31:0]                  j_imm;
-   wire [31:0]                  b_imm;
-   wire [31:0]                  i_imm;
-   wire [31:0]                  s_imm;
+      .instr(fetch_instr),
+      .instr_valid(fetch_instr_valid),
+      .instr_ready(1'b1),//fetch_instr_ready),
 
-   wire [31:0]                  imm;
+      .oPC(fetch_pc),
+      
+      .aluPC(execute_aluValue),
+      .branchTaken(execute_branchTaken),
+      
+      .clk(clk),
+      .rstf(rstf)
+      );
 
-   assign u_imm = { iBus_rsp_instr[31:12], 12'h0 };
-   assign j_imm = { {12{iBus_rsp_instr[31]}}, iBus_rsp_instr[19:12], iBus_rsp_instr[20], iBus_rsp_instr[30:21], 1'b0 };
-   assign b_imm = { {20{iBus_rsp_instr[31]}}, iBus_rsp_instr[7], iBus_rsp_instr[30:25], iBus_rsp_instr[11:8], 1'b0 };
-   assign i_imm = { {20{iBus_rsp_instr[31]}}, iBus_rsp_instr[31:20] };
-   assign s_imm = { {20{iBus_rsp_instr[31]}}, iBus_rsp_instr[31:25], iBus_rsp_instr[11:7] };
+   instruction_decode u_decode
+     (.t_instr(fetch_instr),
+      .t_instr_valid(fetch_instr_valid),
+      .t_instr_ready(fetch_instr_ready),
 
-   assign imm = (instr_lui | instr_auipc) ? u_imm:
-                instr_jal ? j_imm:
-                instr_branch ? b_imm:
-                (instr_load | instr_jalr | instr_alu_imm) ? i_imm:
-                instr_store ? s_imm:32'h0;
+      .i_instr(decode_instr),
+      .i_instr_valid(decode_instr_valid),
+      .i_instr_ready(decode_instr_ready),
 
-   enum logic [3:0] { ALU_ADD,
-                      ALU_SUB,
-                      ALU_SLL,
-                      ALU_SLT,
-                      ALU_SLTU,
-                      ALU_XOR,
-                      ALU_SRL,
-                      ALU_SRA,
-                      ALU_OR,
-                      ALU_AND,
-                      ALU_AUIPC } alu_type;
+      .iPC(fetch_pc),
+      .oPC(decode_pc),
 
-   assign alu_type = (instr_add | instr_addi | instr_lui | op_load | op_store) ? ALU_ADD:
-                   (instr_sub) ? ALU_SUB:
-                   (instr_sll | instr_slli) ? ALU_SLL:
-                   (instr_slt | instr_slti) ? ALU_SLT:
-                   (instr_sltu | instr_sltiu) ? ALU_SLTU:
-                   (instr_xor | instr_xori) ? ALU_XOR:
-                   (instr_srl | instr_srli) ? ALU_SRL:
-                   (instr_sra | instr_srai) ? ALU_SRA:
-                   (instr_or | instr_ori) ? ALU_OR:
-                   (instr_and | instr_andi) ? ALU_AND:
-                   (instr_auipc) ? ALU_AUIPC:4'hF;
+      .rs1(decode_rs1),
+      .rs2(decode_rs2),
+      .rd(decode_rd),
 
-   enum logic [2:0] { BR_NONE,
-                      BR_EQ,
-                      BR_NE,
-                      BR_LT,
-                      BR_GE,
-                      BR_LTU,
-                      BR_GEU,
-                      BR_JUMP } branch_type;
+      .decodedOP(decode_decodedOP),
+      .immediate(decode_immediate),
 
-   assign branch_type = instr_beq ? BR_EQ:
-                      instr_bne ? BR_NE:
-                      instr_blt ? BR_LT:
-                      instr_bge ? BR_GE:
-                      instr_bltu ? BR_LTU:
-                      instr_bgeu ? BR_GEU:
-                      instr_jump ? BR_JUMP:BR_NONE;
+      .clk(clk),
+      .rstf(rstf)
+      );
 
-   wire [4:0] rs1_index;
-   wire [4:0] rs2_index;
-   
-   assign rs1_index = (instr_lui | instr_auipc | instr_jal) ? 5'h0:rs1;
-   assign rs2_index = (op_load | instr_jump | op_alu_imm) ? 5'h0:rs2;
+   instruction_execute u_execute
+     (.t_instr(decode_instr),
+      .t_instr_valid(decode_instr_valid),
+      .t_instr_ready(decode_instr_ready),
 
-   wire op_is_imm;
+      .i_instr(execute_instr),
+      .i_instr_valid(execute_instr_valid),
+      .i_instr_ready(execute_instr_ready),
 
-   assign op_is_imm = op_alu_imm | instr_jal | op_load | op_store;
-   
-   wire [31:0] rs1_value;
-   wire [31:0] rs2_value;
+      .iPC(decode_pc),
+      .oPC(execute_pc),
 
-   assign rs1_value = xregs[rs1_index];
-   assign rs2_value = xregs[rs2_index];
-   
-   wire [31:0] alu_srca;
-   wire [31:0] alu_srcb;
-   
-   assign alu_srca = rs1_value;
-   //assign alu_srcb = rs2_value;
+      .rs1Value(regfile_rs1Value),
+      .rs2Value(regfile_rs2Value),
 
+      .iDecodedOP(decode_decodedOP),
+      .oDecodedOP(execute_decodedOP),
 
-   assign alu_srcb = op_is_imm ? imm : rs2_value;
+      .aluValue(execute_aluValue),
+      .oRs2Value(execute_rs2Value),
+      .immediate(decode_immediate),
 
-   reg [31:0] alu_res;
+      .branchTaken(execute_branchTaken),
 
-   // ALU
+      .clk(clk),
+      .rstf(rstf)
+      );
 
-   always @(*) begin
-      case(alu_type)
-         ALU_ADD:
-           alu_res = $signed(alu_srca) + $signed(alu_srcb);
-        ALU_SUB:
-          alu_res = $signed(alu_srca) + $signed(alu_srcb);
-        ALU_SLL:
-          alu_res = alu_srca << alu_srcb;
-        ALU_SLT:
-          alu_res = $signed(alu_srca) < $signed(alu_srcb) ? 1:0;
-        ALU_SLTU:
-          alu_res = alu_srca < alu_srcb ? 1:0;
-        ALU_XOR:
-          alu_res = alu_srca ^ alu_srcb;
-        ALU_SRL:
-          alu_res = alu_srca >> alu_srcb;
-        ALU_SRA:
-          alu_res = $signed(alu_srca) >> alu_srcb;
-        ALU_OR:
-          alu_res = alu_srca | alu_srcb;
-        ALU_AND:
-          alu_res = alu_srca & alu_srcb;
-        ALU_AUIPC:
-          alu_res = pc + alu_srcb;
-        default:
-          alu_res = 0;
-      endcase // case (alu_type)
-   end // always @ (*)
+   instruction_memoryaccess u_memoryaccess
+     (.t_instr(execute_instr),
+      .t_instr_valid(execute_instr_valid),
+      .t_instr_ready(execute_instr_ready),
 
+      .i_instr(memoryaccess_instr),
+      .i_instr_valid(memoryaccess_instr_valid),
+      .i_instr_ready(memoryaccess_instr_ready),
 
-   wire branch_taken;
-   
-   assign branch_taken = (BR_JUMP == branch_type) ? 1'b1 :
-                         (BR_EQ   == branch_type) ? rs1_value == rs2_value :
-                         (BR_NE   == branch_type) ? rs1_value != rs2_value :
-                         (BR_LT   == branch_type) ? $signed(rs1_value) < $signed(rs2_value) :
-                         (BR_GE   == branch_type) ? $signed(rs1_value) >= $signed(rs2_value) :
-                         (BR_LTU  == branch_type) ? rs1_value < rs2_value :
-                         (BR_GEU  == branch_type) ? rs1_value >= rs2_value : 1'b0;
-   
-   wire [31:0] jump_addr;
+      .iPC(execute_pc),
+      .oPC(memoryaccess_pc),
+      
+      .iDecodedOP(execute_decodedOP),
+      .oDecodedOP(memoryaccess_decodedOP),
 
-   assign jump_addr = instr_jalr ? rs1_value + imm : pc + imm;
-   
-   enum logic [1:0]  { SIZE_BYTE = 2'd0,
-                      SIZE_HALF = 2'd1,
-                      SIZE_WORD = 2'd2 } mem_size;
+      .aluValue(execute_aluValue),
+      .rs2Value(execute_rs2Value),
+      
+      .maAluValue(memoryaccess_maAluValue),
 
-   assign mem_size = (instr_lb | instr_lbu | instr_sb) ? SIZE_BYTE :
-                     (instr_lh | instr_lhu | instr_sh) ? SIZE_HALF : SIZE_WORD;
-   
+      .dbus_cmd_addr(dBus_cmd_payload_addr),
+      .dbus_cmd_data(dBus_cmd_payload_data),
+      .dbus_cmd_size(dBus_cmd_payload_size),
+      .dbus_cmd_we(dBus_cmd_payload_wr),
+      .dbus_cmd_valid(dBus_cmd_valid),
+      .dbus_cmd_ready(dBus_cmd_ready),
+      .dbus_rsp_data(dBus_rsp_data),
+      .dbus_rsp_valid(dBus_rsp_valid),
 
-   assign dBus_cmd_payload_addr = alu_res;
-   assign dBus_cmd_payload_data = rs2_value;
-   assign dBus_cmd_payload_size = mem_size == 0 ? 4'b0001:
-                                  mem_size == 1 ? 4'b0011:
-                                  mem_size == 2 ? 4'b1111:0;
-   assign dBus_cmd_payload_wr = op_store;
-   assign dBus_cmd_valid = op_store | op_load;
+      .clk(clk),
+      .rstf(rstf)
+      );
 
-   wire [31:0]      mem_rdata;
-   assign mem_rdata = (mem_size == SIZE_BYTE) ? { {24{dBus_rsp_data[7]}}, dBus_rsp_data[7:0]} :
-                      (mem_size == SIZE_HALF) ? { {16{dBus_rsp_data[15]}}, dBus_rsp_data[15:0]} :
-                      dBus_rsp_data;
+   instruction_writeback u_writeback
+     (.t_instr(memoryaccess_instr),
+      .t_instr_valid(memoryaccess_instr_valid),
+      .t_instr_ready(memoryaccess_instr_ready),
 
-   
+      .iDecodedOP(memoryaccess_decodedOP),
+      /* verilator lint_off PINCONNECTEMPTY */
+      .oDecodedOP(),
+      /* verilator lint_on PINCONNECTEMPTY */
+      //.dbus_rdata(memoryaccess_dbus_rdata),
+      .maAlu_rdValue(memoryaccess_maAluValue),
+      .rd(writeback_rd),
+      .rdValue(writeback_rdValue),
+      .we(writeback_we),
 
-   
-   wire [31:0]      rd_value;
-   wire             rd_we;
-   
-   assign rd_value = (op_load | op_store) ? mem_rdata : alu_res;
-   assign rd_we = ~(op_branch | op_store);
-
-   always @(posedge clk)
-     if(rd_we)
-       xregs[rd] <= rd_value;
-
-   
-   always @(posedge clk) 
-     if(~rstf) 
-       pc <= 0;
-     else if(branch_taken)
-       pc <= jump_addr[PC_SIZE-1:0];
-     else
-       pc <= pc + 'd4;
-
-   assign iBus_cmd_valid = 1'b1;
-   assign iBus_cmd_payload_pc = pc;
-   
-endmodule // riscv
+      .iPC(memoryaccess_pc),
+      /* verilator lint_off PINCONNECTEMPTY */
+      .oPC(),
+      /* verilator lint_on PINCONNECTEMPTY */
+      .clk(clk),
+      .rstf(rstf)
+      );
+endmodule
