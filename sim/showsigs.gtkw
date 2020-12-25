@@ -1,96 +1,305 @@
 [*]
-[*] GTKWave Analyzer v3.3.98 (w)1999-2019 BSI
-[*] Wed Aug  7 05:56:42 2019
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Fri Dec 25 03:20:03 2020
 [*]
-[dumpfile] "/home/qubits/proj/riscv-sv/sim/logs/top.fst"
-[dumpfile_mtime] "Wed Aug  7 05:52:15 2019"
-[dumpfile_size] 35162
-[savefile] "/home/qubits/proj/riscv-sv/sim/showsigs.gtkw"
-[timestart] 0
-[size] 1870 1016
+[dumpfile] "/home/qubits/proj/riscv-clean/sim/logs/top.fst"
+[dumpfile_mtime] "Fri Dec 25 03:13:17 2020"
+[dumpfile_size] 62666
+[savefile] "/home/qubits/proj/riscv-clean/sim/showsigs.gtkw"
+[timestart] 3247
+[size] 2488 1376
 [pos] -1 -1
-*-5.000000 54 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-5.000000 135 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.riscv_top.
-[sst_width] 261
-[signals_width] 246
+[treeopen] TOP.riscv_top.riscv_0p.
+[sst_width] 233
+[signals_width] 259
 [sst_expanded] 1
-[sst_vpaned_height] 288
-@201
-----DBUS---
-@28
-TOP.riscv_top.riscv_0p.clk
+[sst_vpaned_height] 414
 @22
-TOP.riscv_top.riscv_0p.dBus_cmd_payload_addr[31:0]
-TOP.riscv_top.riscv_0p.dBus_cmd_payload_data[31:0]
-TOP.riscv_top.riscv_0p.dBus_cmd_payload_size[3:0]
+TOP.riscv_top.riscv_0p.u_fetch.aluPC[31:0]
 @28
-TOP.riscv_top.riscv_0p.dBus_cmd_payload_wr
-TOP.riscv_top.riscv_0p.dBus_cmd_ready
-TOP.riscv_top.riscv_0p.dBus_cmd_valid
+TOP.riscv_top.riscv_0p.u_fetch.branchTaken
+TOP.riscv_top.riscv_0p.u_fetch.clk
 @22
-TOP.riscv_top.riscv_0p.dBus_rsp_data[31:0]
+TOP.riscv_top.riscv_0p.u_fetch.ibus_addr[31:0]
+TOP.riscv_top.riscv_0p.u_fetch.ibus_instr[31:0]
+TOP.riscv_top.riscv_0p.u_fetch.instr[31:0]
 @28
-TOP.riscv_top.riscv_0p.dBus_rsp_error
-TOP.riscv_top.riscv_0p.dBus_rsp_valid
+TOP.riscv_top.riscv_0p.u_fetch.instr_ready
+TOP.riscv_top.riscv_0p.u_fetch.instr_valid
+@22
+TOP.riscv_top.riscv_0p.u_fetch.oPC[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_fetch.ready
+TOP.riscv_top.riscv_0p.u_fetch.rstf
+TOP.riscv_top.riscv_0p.u_fetch.valid
 @200
-----REGS---
+---- DECODE ---
 @22
-TOP.riscv_top.riscv_0p.xregs(0)[31:0]
-TOP.riscv_top.riscv_0p.xregs(1)[31:0]
-TOP.riscv_top.riscv_0p.xregs(2)[31:0]
-TOP.riscv_top.riscv_0p.xregs(3)[31:0]
-TOP.riscv_top.riscv_0p.xregs(4)[31:0]
-TOP.riscv_top.riscv_0p.xregs(5)[31:0]
-TOP.riscv_top.riscv_0p.xregs(6)[31:0]
-TOP.riscv_top.riscv_0p.xregs(7)[31:0]
-TOP.riscv_top.riscv_0p.xregs(8)[31:0]
-TOP.riscv_top.riscv_0p.xregs(9)[31:0]
-TOP.riscv_top.riscv_0p.xregs(10)[31:0]
-TOP.riscv_top.riscv_0p.xregs(11)[31:0]
-TOP.riscv_top.riscv_0p.xregs(12)[31:0]
-TOP.riscv_top.riscv_0p.xregs(13)[31:0]
-TOP.riscv_top.riscv_0p.xregs(14)[31:0]
-TOP.riscv_top.riscv_0p.xregs(15)[31:0]
-TOP.riscv_top.riscv_0p.xregs(16)[31:0]
-TOP.riscv_top.riscv_0p.xregs(17)[31:0]
-TOP.riscv_top.riscv_0p.xregs(18)[31:0]
-TOP.riscv_top.riscv_0p.xregs(19)[31:0]
-TOP.riscv_top.riscv_0p.xregs(20)[31:0]
-TOP.riscv_top.riscv_0p.xregs(21)[31:0]
-TOP.riscv_top.riscv_0p.xregs(22)[31:0]
-TOP.riscv_top.riscv_0p.xregs(23)[31:0]
-TOP.riscv_top.riscv_0p.xregs(24)[31:0]
-TOP.riscv_top.riscv_0p.xregs(25)[31:0]
-TOP.riscv_top.riscv_0p.xregs(26)[31:0]
-TOP.riscv_top.riscv_0p.xregs(27)[31:0]
-TOP.riscv_top.riscv_0p.xregs(28)[31:0]
-TOP.riscv_top.riscv_0p.xregs(29)[31:0]
-TOP.riscv_top.riscv_0p.xregs(30)[31:0]
-TOP.riscv_top.riscv_0p.xregs(31)[31:0]
+TOP.riscv_top.riscv_0p.u_decode.b_imm[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_decode.btype
+TOP.riscv_top.riscv_0p.u_decode.clk
+@22
+TOP.riscv_top.riscv_0p.u_decode.decodedOP[4:0]
+TOP.riscv_top.riscv_0p.u_decode.iPC[31:0]
+TOP.riscv_top.riscv_0p.u_decode.i_imm[31:0]
+TOP.riscv_top.riscv_0p.u_decode.i_instr[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_decode.i_instr_ready
+TOP.riscv_top.riscv_0p.u_decode.i_instr_valid
+@22
+TOP.riscv_top.riscv_0p.u_decode.immediate[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_decode.itype
+@22
+TOP.riscv_top.riscv_0p.u_decode.j_imm[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_decode.jtype
+@22
+TOP.riscv_top.riscv_0p.u_decode.oPC[31:0]
+@100000028
+TOP.riscv_top.riscv_0p.u_decode.opcode[6:0]
+@22
+TOP.riscv_top.riscv_0p.u_decode.rd[4:0]
+TOP.riscv_top.riscv_0p.u_decode.rs1[4:0]
+@23
+TOP.riscv_top.riscv_0p.u_decode.rs2[4:0]
+@28
+TOP.riscv_top.riscv_0p.u_decode.rstf
+TOP.riscv_top.riscv_0p.u_decode.rtype
+@22
+TOP.riscv_top.riscv_0p.u_decode.s_imm[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_decode.stype
+@22
+TOP.riscv_top.riscv_0p.u_decode.t_instr[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_decode.t_instr_ready
+TOP.riscv_top.riscv_0p.u_decode.t_instr_valid
+@22
+TOP.riscv_top.riscv_0p.u_decode.u_imm[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_decode.utype
 @200
-----IBUS---
-@28
-TOP.riscv_top.riscv_0p.clk
-TOP.riscv_top.riscv_0p.rstf
+---- EXECUTE ---
+@100000028
+TOP.riscv_top.riscv_0p.u_execute.op_debug[4:0]
 @22
-TOP.riscv_top.riscv_0p.iBus_cmd_payload_pc[31:0]
+TOP.riscv_top.riscv_0p.u_execute.aluValue[31:0]
 @28
-TOP.riscv_top.riscv_0p.iBus_cmd_ready
-TOP.riscv_top.riscv_0p.iBus_cmd_valid
-TOP.riscv_top.riscv_0p.iBus_rsp_err
+TOP.riscv_top.riscv_0p.u_execute.branchTaken
+TOP.riscv_top.riscv_0p.u_execute.clk
 @22
-TOP.riscv_top.riscv_0p.iBus_rsp_instr[31:0]
+TOP.riscv_top.riscv_0p.u_execute.iDecodedOP[4:0]
+TOP.riscv_top.riscv_0p.u_execute.iPC[31:0]
+@c00022
+TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
 @28
-TOP.riscv_top.riscv_0p.iBus_rsp_ready
+(0)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(1)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(2)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(3)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(4)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(5)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(6)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(7)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(8)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(9)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(10)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(11)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(12)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(13)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(14)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(15)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(16)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(17)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(18)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(19)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(20)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(21)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(22)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(23)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(24)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(25)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(26)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(27)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(28)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(29)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(30)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+(31)TOP.riscv_top.riscv_0p.u_execute.i_instr[31:0]
+@1401200
+-group_end
+@28
+TOP.riscv_top.riscv_0p.u_execute.i_instr_ready
+TOP.riscv_top.riscv_0p.u_execute.i_instr_valid
+@22
+TOP.riscv_top.riscv_0p.u_execute.immediate[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_execute.isALU
+TOP.riscv_top.riscv_0p.u_execute.isALUIMM
+TOP.riscv_top.riscv_0p.u_execute.isBranch
+@22
+TOP.riscv_top.riscv_0p.u_execute.oDecodedOP[4:0]
+TOP.riscv_top.riscv_0p.u_execute.oPC[31:0]
+TOP.riscv_top.riscv_0p.u_execute.oRs2Value[31:0]
+@100000028
+TOP.riscv_top.riscv_0p.u_execute.op_debug[4:0]
+@22
+TOP.riscv_top.riscv_0p.u_execute.rs1ValueMux[31:0]
+TOP.riscv_top.riscv_0p.u_execute.rs1Value[31:0]
+TOP.riscv_top.riscv_0p.u_execute.rs2ValueMux[31:0]
+@c00022
+TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+@28
+(0)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(1)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(2)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(3)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(4)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(5)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(6)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(7)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(8)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(9)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(10)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(11)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(12)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(13)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(14)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(15)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(16)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(17)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(18)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(19)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(20)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(21)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(22)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(23)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(24)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(25)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(26)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(27)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(28)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(29)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(30)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+(31)TOP.riscv_top.riscv_0p.u_execute.rs2Value[31:0]
+@1401200
+-group_end
 @200
-----op code---
+---- MEMORY ACESS ---
+@22
+TOP.riscv_top.riscv_0p.u_memoryaccess.aluValue[31:0]
 @28
-TOP.riscv_top.riscv_0p.op_alu_imm
-TOP.riscv_top.riscv_0p.op_alu_reg
-TOP.riscv_top.riscv_0p.op_branch
-TOP.riscv_top.riscv_0p.op_is_imm
-TOP.riscv_top.riscv_0p.op_load
-TOP.riscv_top.riscv_0p.op_store
+TOP.riscv_top.riscv_0p.u_memoryaccess.clk
+@22
+TOP.riscv_top.riscv_0p.u_memoryaccess.dbus_cmd_addr[31:0]
+TOP.riscv_top.riscv_0p.u_memoryaccess.dbus_cmd_data[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_memoryaccess.dbus_cmd_ready
+@22
+TOP.riscv_top.riscv_0p.u_memoryaccess.dbus_cmd_size[3:0]
+@28
+TOP.riscv_top.riscv_0p.u_memoryaccess.dbus_cmd_valid
+TOP.riscv_top.riscv_0p.u_memoryaccess.dbus_cmd_we
+@22
+TOP.riscv_top.riscv_0p.u_memoryaccess.dbus_rsp_data[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_memoryaccess.dbus_rsp_valid
+@22
+TOP.riscv_top.riscv_0p.u_memoryaccess.iDecodedOP[4:0]
+TOP.riscv_top.riscv_0p.u_memoryaccess.iPC[31:0]
+TOP.riscv_top.riscv_0p.u_memoryaccess.i_instr[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_memoryaccess.i_instr_ready
+TOP.riscv_top.riscv_0p.u_memoryaccess.i_instr_valid
+@22
+TOP.riscv_top.riscv_0p.u_memoryaccess.maAluValue[31:0]
+TOP.riscv_top.riscv_0p.u_memoryaccess.oDecodedOP[4:0]
+TOP.riscv_top.riscv_0p.u_memoryaccess.oPC[31:0]
+TOP.riscv_top.riscv_0p.u_memoryaccess.rs2Value[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_memoryaccess.rstf
+@22
+TOP.riscv_top.riscv_0p.u_memoryaccess.t_instr[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_memoryaccess.t_instr_ready
+TOP.riscv_top.riscv_0p.u_memoryaccess.t_instr_valid
+@200
+---- WRITEBACK ---
+@28
+TOP.riscv_top.riscv_0p.u_writeback.clk
+@22
+TOP.riscv_top.riscv_0p.u_writeback.iDecodedOP[4:0]
+TOP.riscv_top.riscv_0p.u_writeback.iPC[31:0]
+TOP.riscv_top.riscv_0p.u_writeback.maAlu_rdValue[31:0]
+TOP.riscv_top.riscv_0p.u_writeback.oDecodedOP[4:0]
+TOP.riscv_top.riscv_0p.u_writeback.oPC[31:0]
+TOP.riscv_top.riscv_0p.u_writeback.rdValue[31:0]
+TOP.riscv_top.riscv_0p.u_writeback.rd[4:0]
+@28
+TOP.riscv_top.riscv_0p.u_writeback.rstf
+@22
+TOP.riscv_top.riscv_0p.u_writeback.t_instr[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_writeback.t_instr_ready
+TOP.riscv_top.riscv_0p.u_writeback.t_instr_valid
+TOP.riscv_top.riscv_0p.u_writeback.we
+@200
+---- REGFILE ---
+@28
+TOP.riscv_top.riscv_0p.u_execute.rstf
+@22
+TOP.riscv_top.riscv_0p.u_execute.t_instr[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_execute.t_instr_ready
+TOP.riscv_top.riscv_0p.u_execute.t_instr_valid
+@22
+TOP.riscv_top.riscv_0p.u_regfile.addrA[4:0]
+TOP.riscv_top.riscv_0p.u_regfile.addrB[4:0]
+TOP.riscv_top.riscv_0p.u_regfile.addrDest[4:0]
+@28
+TOP.riscv_top.riscv_0p.u_regfile.clk
+@22
+TOP.riscv_top.riscv_0p.u_regfile.dataDest[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.regA[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.regB[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(0)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(1)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(2)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(3)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(4)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(5)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(6)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(7)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(8)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(9)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(10)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(11)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(12)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(13)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(14)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(15)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(16)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(17)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(18)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(19)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(20)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(21)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(22)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(23)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(24)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(25)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(26)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(27)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(28)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(29)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(30)[31:0]
+TOP.riscv_top.riscv_0p.u_regfile.registers(31)[31:0]
+@28
+TOP.riscv_top.riscv_0p.u_regfile.rstf
+TOP.riscv_top.riscv_0p.u_regfile.weDest
 [pattern_trace] 1
 [pattern_trace] 0
