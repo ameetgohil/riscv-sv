@@ -21,6 +21,7 @@ module riscv_top
     wire [31:0] dBus_rsp_data;
     wire        dBus_rsp_valid;
     wire        dBus_rsp_error;
+   wire         dBus_rsp_ready;
 
    assign iBus_rsp_err = 1'b0;
    assign dBus_rsp_error = 1'b0;
