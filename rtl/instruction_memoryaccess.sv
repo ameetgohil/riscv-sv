@@ -12,18 +12,18 @@ module instruction_memoryaccess
    output logic [31:0]  oPC,
    
    input wire [4:0]    iDecodedOP,
-   output wire [4:0]   oDecodedOP,
+   output logic [4:0]   oDecodedOP,
 
    input wire [31:0]   aluValue,
    input wire [31:0]   rs2Value,
 
-   output wire [31:0]  maAluValue,
+   output logic [31:0]  maAluValue,
    
-   output wire [31:0]  dbus_cmd_addr,
-   output wire [31:0]  dbus_cmd_data,
-   output wire         dbus_cmd_we,
+   output logic [31:0]  dbus_cmd_addr,
+   output logic [31:0]  dbus_cmd_data,
+   output logic         dbus_cmd_we,
    output logic [3:0]  dbus_cmd_size,
-   output wire         dbus_cmd_valid,
+   output logic         dbus_cmd_valid,
    input wire          dbus_cmd_ready,
    input wire [31:0]   dbus_rsp_data,
    input wire          dbus_rsp_valid,
@@ -37,13 +37,13 @@ module instruction_memoryaccess
    always_comb oDecodedOP = iDecodedOP;
    always_comb oPC = iPC;
    
-   assign dbus_cmd_addr = aluValue;
-   assign dbus_cmd_data = rs2Value;
-   assign dbus_cmd_we = (operation_t'(iDecodedOP) == STORE);
-   assign dbus_cmd_valid = (operation_t'(iDecodedOP) == STORE) | (operation_t'(iDecodedOP) == LOAD);
+   always_comb dbus_cmd_addr = aluValue;
+   always_comb dbus_cmd_data = rs2Value;
+   always_comb dbus_cmd_we = (operation_t'(iDecodedOP) == STORE);
+   always_comb dbus_cmd_valid = (operation_t'(iDecodedOP) == STORE) | (operation_t'(iDecodedOP) == LOAD);
    always_comb dbus_cmd_size = memsize(t_instr, iDecodedOP);
    
-   assign maAluValue = (operation_t'(iDecodedOP) == LOAD) ? dbus_rsp_data : aluValue;
+   always_comb maAluValue = (operation_t'(iDecodedOP) == LOAD) ? dbus_rsp_data : aluValue;
 
    /* verilator lint_off UNUSED */
    function automatic logic[3:0] memsize(logic[31:0] instr, operation_t decodedOP);

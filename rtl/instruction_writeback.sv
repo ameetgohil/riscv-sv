@@ -5,14 +5,14 @@ module instruction_writeback
 
    input wire [31:0]   iPC,
    output logic [31:0] oPC,
-   
+  
    input wire [4:0]    iDecodedOP,
    output logic [4:0]  oDecodedOP,
 
-//   input wire [31:0]  dbus_rdata,
-   output reg [4:0]    rd,
+   //   input wire [31:0]  dbus_rdata,
+   output logic [4:0]  rd,
    input wire [31:0]   maAlu_rdValue,
-   output reg          we,
+   output logic        we,
 
    output wire [31:0]  rdValue,
 
@@ -25,7 +25,7 @@ module instruction_writeback
    
    always_comb rd = t_instr[11:7];
 
-      /* verilator lint_off UNUSED */
+   /* verilator lint_off UNUSED */
    opcode_t op_debug;
    always_comb op_debug = opcode_t'(t_instr`opcode);
    /* verilator lint_on UNUSED */

@@ -1,40 +1,40 @@
 `include "riscv.svh"
 module instruction_decode
   (input wire[31:0] t_instr,
-   input wire         t_instr_valid,
-   output wire        t_instr_ready,
+   input wire          t_instr_valid,
+   output logic        t_instr_ready,
 
-   output wire [31:0] i_instr,
-   output wire        i_instr_valid,
-   input wire         i_instr_ready,
+   output logic [31:0] i_instr,
+   output logic        i_instr_valid,
+   input wire          i_instr_ready,
 
-   input wire [31:0]  iPC,
-   output wire [31:0] oPC,
+   input wire [31:0]   iPC,
+   output logic [31:0] oPC,
 
-   output wire [4:0]  rs1,
-   output wire [4:0]  rs2,
-   output wire [4:0]  rd,
+   output logic [4:0]  rs1,
+   output logic [4:0]  rs2,
+   output logic [4:0]  rd,
 
-   output wire [4:0]  decodedOP,
-   output wire [31:0] immediate,
+   output logic [4:0]  decodedOP,
+   output logic [31:0] immediate,
 
-   input wire         clk, rstf
+   input wire          clk, rstf
    );
 
    logic               utype, jtype, itype, btype, stype, rtype;
-   wire [31:0]        u_imm, j_imm, b_imm, i_imm, s_imm;
+   logic [31:0]        u_imm, j_imm, b_imm, i_imm, s_imm;
 
-   assign i_instr = t_instr;
-   assign i_instr_valid = t_instr_valid;
-   assign t_instr_ready = i_instr_ready;
+   always_comb i_instr = t_instr;
+   always_comb i_instr_valid = t_instr_valid;
+   always_comb t_instr_ready = i_instr_ready;
 
-   assign oPC = iPC;
+   always_comb oPC = iPC;
 
    opcode_t opcode;
-   assign rs1 = t_instr[19:15];
-   assign rs2 = t_instr[24:20];
-   assign rd = t_instr[11:7];
-   assign opcode = t_instr`opcode;
+   always_comb rs1 = t_instr[19:15];
+   always_comb rs2 = t_instr[24:20];
+   always_comb rd = t_instr[11:7];
+   always_comb opcode = t_instr`opcode;
    
    
    
@@ -62,20 +62,20 @@ module instruction_decode
       endcase // case (opcode)
    end // always_comb
 
-   assign u_imm = { t_instr[31:12], 12'h0 };
-   assign j_imm = { {12{t_instr[31]}}, t_instr[19:12], t_instr[20], t_instr[30:21], 1'b0 };
-   assign b_imm = { {20{t_instr[31]}}, t_instr[7], t_instr[30:25], t_instr[11:8], 1'b0 };
-   assign i_imm = { {20{t_instr[31]}}, t_instr[31:20] };
-   assign s_imm = { {20{t_instr[31]}}, t_instr[31:25], t_instr[11:7] };
+   always_comb u_imm = { t_instr[31:12], 12'h0 };
+   always_comb j_imm = { {12{t_instr[31]}}, t_instr[19:12], t_instr[20], t_instr[30:21], 1'b0 };
+   always_comb b_imm = { {20{t_instr[31]}}, t_instr[7], t_instr[30:25], t_instr[11:8], 1'b0 };
+   always_comb i_imm = { {20{t_instr[31]}}, t_instr[31:20] };
+   always_comb s_imm = { {20{t_instr[31]}}, t_instr[31:25], t_instr[11:7] };
    
-   assign immediate = itype ? i_imm :
-                      stype ? s_imm :
-                      btype ? b_imm :
-                      utype ? u_imm :
-                      jtype ? j_imm :
-                      0;// rtype
+   always_comb immediate = itype ? i_imm :
+                           stype ? s_imm :
+                           btype ? b_imm :
+                           utype ? u_imm :
+                           jtype ? j_imm :
+                           0;// rtype
 
-   assign decodedOP = decodeOP(t_instr);
+   always_comb decodedOP = decodeOP(t_instr);
 
    //partially unused bits of input instruction
    /* verilator lint_off UNUSED */
@@ -133,7 +133,7 @@ module instruction_decode
                 F7_SUB_SRA: return SRA;
                 default: begin end
               endcase // case (instruction`func7)
-             F3_OR: return OR;
+            F3_OR: return OR;
             F3_AND: return AND;
             default: begin end
           endcase // case (instruction`func3)

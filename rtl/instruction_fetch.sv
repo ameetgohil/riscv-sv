@@ -1,19 +1,19 @@
 module instruction_fetch
   (output logic [31:0] ibus_addr,
    output logic        valid,
-   input wire         ready,
-   input wire [31:0]  ibus_instr,
+   input wire          ready,
+   input wire [31:0]   ibus_instr,
 
    output logic [31:0] instr,
    output logic        instr_valid,
-   input wire        instr_ready,
+   input wire          instr_ready,
 
    output logic [31:0] oPC,
 
-   input wire [31:0]  aluPC,
-   input wire         branchTaken, 
+   input wire [31:0]   aluPC,
+   input wire          branchTaken, 
 
-   input wire         clk, rstf
+   input wire          clk, rstf
    );
 
    always_comb ibus_addr = oPC;
@@ -28,7 +28,7 @@ module instruction_fetch
         oPC <= 0;
       else
         oPC <= ~instr_ready ? oPC :
-              branchTaken ? aluPC : oPC + 4;
+               branchTaken ? aluPC : oPC + 4;
    end
 
    
